@@ -1,0 +1,10 @@
+# config.yaml
+
+inference_controller:
+  ros__parameters:
+    joint_state_topic: "/state_broadcaster/joints_state_forced"
+    imu_topic: "/IMU_Broadcaster/imu_forced"                    #Takes from force_measure node
+    joint_target_pos_topic: "/joint_controller/command"
+    cmd_vel_topic: "/cmd_vel"
+    rate: 100
+    use_imu: True

@@ -1,0 +1,9 @@
+OmniMulinex_Joystic:
+  ros__parameters:
+    bag_folder: /home/ros/docker_pronto_ws/
+    sup_vel_x: 1.0
+    sup_vel_y: 1.0
+    sup_omega: 2.5
+    sup_height_rate: 0.3
+    deadzone_joy: 0.1
+    

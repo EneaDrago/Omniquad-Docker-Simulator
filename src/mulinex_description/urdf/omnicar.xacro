@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<robot name="mulinex" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find mulinex_description)/urdf/omni_car_module.xacro" />
+    <xacro:property name="mulinex_base" value="file://$(find mulinex_description)/meshes//Body.stl" />
+    <xacro:include filename="$(find mulinex_description)/urdf/material.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/omnicar_ignition.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/imu_sensor.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/lidar_sensor.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/camera_sensor.xacro" />
+
+    <xacro:arg name="use_gazebo" default="true" />
+    <xacro:arg name="yaml_file" default=""/>
+    <xacro:arg name="lidar_3D" default="true"/>
+    <xacro:arg name="omnicar_namespace" default="omnicar"/>
+
+    <xacro:arg name="jnt_prefix" default=""/>
+
+    
+    <xacro:arg name="front_haa" default="0.0" />
+    <xacro:arg name="hind_haa" default="0.0" />
+
+
+    <link name="$(arg jnt_prefix)base_link">
+        <visual>
+            <material name="black"/>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${mulinex_base}" />
+                <!-- <box size="0.353 0.090 0.066" /> -->
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.353 0.090 0.066" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.3008737" />
+            <origin xyz="-1.4565496e-03 -2.5110071e-03 -4.2484136e-03" rpy="0 0 0" />
+            <inertia ixx="4.0762590e-03" ixy="-2.5234809e-05" ixz="-3.2587794e-06"
+                iyy="9.2413606e-03" iyz="-8.0660183e-06"
+                izz="1.2268730e-02" />
+        </inertial>
+        
+    </link>
+    <gazebo>
+
+        <plugin
+            filename="ignition-gazebo-odometry-publisher-system"
+            name="ignition::gazebo::systems::OdometryPublisher">
+            <dimensions>3</dimensions>
+            <odom_publish_frequency>100</odom_publish_frequency>
+            <odom_frame>$(arg omnicar_namespace)/gt_odom</odom_frame>
+            <robot_base_frame>$(arg omnicar_namespace)/base_link</robot_base_frame>
+            <odom_topic>$(arg omnicar_namespace)/gt_odom</odom_topic>
+            <tf_topic>$(arg omnicar_namespace)/gt_pose_gazebo</tf_topic>
+        </plugin>
+        <!-- <plugin
+            filename="libignition-gazebo6-pose-publisher-system"
+            name="ignition::gazebo::systems::PosePublisher">
+            
+            <update_frequency>10</update_frequency>
+            <use_pose_vector_msg>false</use_pose_vector_msg>
+            <publish_nested_model_pose>false</publish_nested_model_pose>
+            <publish_model_pose>true</publish_model_pose>
+            <publish_sensor_pose>false</publish_sensor_pose>
+            <publish_collision_pose>false</publish_collision_pose>
+            <publish_visual_pose>false</publish_visual_pose>
+            <publish_link_pose>false</publish_link_pose>
+
+        </plugin> -->
+    </gazebo>
+    <xacro:omni_mod
+        prefix="LH"
+        gazebo="$(arg use_gazebo)"
+        jnt_pref="$(arg jnt_prefix)"
+        simplify_meshes="true" 
+        />
+    <xacro:omni_mod
+        prefix="LF"
+        gazebo="$(arg use_gazebo)"
+        jnt_pref="$(arg jnt_prefix)"
+        simplify_meshes="true"
+        />
+    <xacro:omni_mod
+        prefix="RF"
+        gazebo="$(arg use_gazebo)"
+        jnt_pref="$(arg jnt_prefix)"
+        simplify_meshes="true"
+        />
+    <xacro:omni_mod
+        prefix="RH"
+        gazebo="$(arg use_gazebo)"
+        jnt_pref="$(arg jnt_prefix)"
+        simplify_meshes="true"
+    />
+    <xacro:imu_sensor namespace="$(arg omnicar_namespace)"/>
+    <xacro:lidar_sensor tredi="$(arg lidar_3D)" namespace="$(arg omnicar_namespace)"/>
+    <!-- <xacro:camera_sensor namespace="$(arg omnicar_namespace)"/> -->
+
+    <xacro:omnicar_ign_hw 
+        gazebo="$(arg use_gazebo)"
+        yaml="$(arg yaml_file)"    
+    />
+
+    
+</robot>

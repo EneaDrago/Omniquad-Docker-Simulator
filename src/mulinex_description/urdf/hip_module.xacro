@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="base_2_HAA_y" value="${81.0 * 0.001}" />
+    <xacro:property name="base_2_HAA_x" value="${45.0 * 0.001}" />
+    <xacro:property name="PI" value="3.141592" />
+
+    <!-- MULINEX VISUALIZATION meshes -->
+    
+    <xacro:property name="mulinex_module_left_front"
+        value="file://$(find mulinex_description)/meshes//Module_left_front.stl" />
+    <xacro:property name="mulinex_module_left_hind"
+        value="file://$(find mulinex_description)/meshes//Module_left_hind.stl" />
+    <xacro:property name="mulinex_module_2_left"
+        value="file://$(find mulinex_description)/meshes//Module_2_left.stl" />
+    <xacro:property name="mulinex_lower_leg_left"
+        value="file://$(find mulinex_description)/meshes//Lower_leg_left.stl" />
+    <xacro:property name="mulinex_module_right_front"
+        value="file://$(find mulinex_description)/meshes//Module_right_front.stl" />
+    <xacro:property name="mulinex_module_right_hind"
+        value="file://$(find mulinex_description)/meshes//Module_right_hind.stl" />
+    <xacro:property name="mulinex_module_2_right"
+        value="file://$(find mulinex_description)/meshes//Module_2_right.stl" />
+    <xacro:property name="mulinex_lower_leg_right"
+        value="file://$(find mulinex_description)/meshes//Lower_leg_right.stl" />
+
+
+    <!-- HIP -->
+    <xacro:macro name="hip" params="prefix gazebo jnt_pref simplify_meshes">
+        <!-- Transformation based on the position of each link -->
+        <xacro:if value="${prefix == 'LF'}">
+            <xacro:property name="base_to_hip_xyz" value="${base_2_HAA_x} ${base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'LH'}">
+            <xacro:property name="base_to_hip_xyz" value="${-base_2_HAA_x} ${base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RF'}">
+            <xacro:property name="base_to_hip_xyz" value="${base_2_HAA_x} ${-base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RH'}">
+            <xacro:property name="base_to_hip_xyz" value="${-base_2_HAA_x} ${-base_2_HAA_y} 0" />
+        </xacro:if>
+
+        <!-- Joint to fix the leg to the base -->
+        <joint name="${prefix}_HAA" type="fixed">
+            <parent link="${jnt_pref}base_link" />
+            <child link="${jnt_pref}${prefix}_SHOULDER" />
+            <origin xyz="${base_to_hip_xyz}" rpy="0 0 0" />
+        </joint>
+        <!-- Shoulder link -->
+        <link name="${prefix}_SHOULDER">
+            <visual>
+                <material name="black" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+            </visual>
+
+            <collision>
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+            </collision>
+
+            <inertial>
+                <mass value="0.47669673" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin
+                        xyz="7.2487360e-02 3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin
+                        xyz="-7.2487360e-02 3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="7.2487360e-02 -3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin
+                        xyz="-7.2487360e-02 -3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+            </inertial>
+        </link>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="${prefix}_SHOULDER">
+                <collision>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1</mu>
+                                <mu2>1</mu2>
+                                <slip1>0</slip1>
+                                <slip2>0</slip2>
+                            </ode>
+                        </friction>
+                        <contact>
+                            <ode>
+                                <kp>1000000.0</kp>
+                                <kd>100.0</kd>
+                                <min_depth>0.001</min_depth>
+                            </ode>
+                        </contact>
+                    </surface>
+                </collision>
+            </gazebo>
+        </xacro:if>
+    </xacro:macro>
+
+    
+</robot>

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find mulinex_description)/urdf/links.xacro" />
+    <xacro:property name="PI" value="3.141592" />
+
+    <xacro:macro name="leg" params="prefix gazebo jnt_pref simplify_meshes feet_type">
+        <!-- Module 1 -->
+        <xacro:hip
+            prefix="${prefix}"
+            gazebo="${gazebo}"
+            jnt_pref="${jnt_pref}"
+            simplify_meshes="${simplify_meshes}"
+        />
+        <!-- Module 2 link -->
+        <xacro:upper_leg
+            prefix="${prefix}"
+            gazebo="${gazebo}"
+            jnt_pref="${jnt_pref}"
+            simplify_meshes="${simplify_meshes}"
+        />
+        <!-- Lower leg link -->
+        <xacro:lower_leg
+            prefix="${prefix}"
+            gazebo="${gazebo}"
+            jnt_pref="${jnt_pref}"
+            simplify_meshes="${simplify_meshes}"
+            feet_type="$(arg feet_type)" 
+        />
+    </xacro:macro>
+
+</robot>

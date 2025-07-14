@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:macro name="mulinex_ign_hw" params="gazebo yaml">
+        
+        
+        
+        
+        
+        <gazebo reference="base_link">
+            <material>Gazebo/White</material>
+        </gazebo>
+
+
+        <ros2_control name="IgnitionSystem" type="system">
+            <hardware>
+                <plugin>ign_ros2_control/IgnitionSystem</plugin>
+            </hardware>
+            <!-- <joint name="LH_HAA">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg hind_haa)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint> -->
+            <joint name="LH_HFE">
+                <command_interface name="effort" />
+                
+                <state_interface name="position">
+                    <param name="initial_value">$(arg LH_HFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="LH_KFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg LH_KFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <!-- <joint name="LF_HAA">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg front_haa)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint> -->
+            <joint name="LF_HFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg LF_HFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="LF_KFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg LF_KFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <!-- <joint name="RH_HAA">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg hind_haa)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint> -->
+            <joint name="RH_HFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg RH_HFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="RH_KFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg RH_KFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <!-- <joint name="RF_HAA">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg front_haa)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint> -->
+            <joint name="RF_HFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg RF_HFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="RF_KFE">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">$(arg RF_KFE)</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+             <joint name="RF_WHEEL_JNT">
+                <command_interface name="velocity" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+             <joint name="RH_WHEEL_JNT">
+                <command_interface name="velocity" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="LF_WHEEL_JNT">
+                <command_interface name="velocity" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="LH_WHEEL_JNT">
+                <command_interface name="velocity" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+          
+        </ros2_control>
+
+        <gazebo>
+            <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+                <parameters>$(find mulinex_ignition)/config/mulinex_mf.yaml</parameters>
+            </plugin>
+        </gazebo>
+
+    </xacro:macro>
+</robot>

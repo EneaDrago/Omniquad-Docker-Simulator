@@ -1,0 +1,12 @@
+# config.yaml
+
+inference_controller:
+  ros__parameters:
+    joint_state_topic: "/Joint_Feedback"
+    joint_target_pos_topic: "/PD_control/command"
+    cmd_vel_topic: "/cmd_vel"
+    imu_topic: "/imu/data"
+    rate: 100 # Hz
+    use_imu: True
+    use_sim_time: False
+    simulation: True

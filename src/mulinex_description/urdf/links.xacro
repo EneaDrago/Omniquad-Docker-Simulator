@@ -1,0 +1,3952 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="base_2_HAA_y" value="${81.0 * 0.001}" />
+    <xacro:property name="base_2_HAA_x" value="${45.0 * 0.001}" />
+
+    <xacro:property name="HAA_2_HFE_x" value="${190.0 * 0.001}" />
+    <xacro:property name="HAA_2_HFE_y" value="${44.0 * 0.001}" />
+
+    <!-- <xacro:property name="base_2_HFE_x" value="${190.00 * 0.001}" /> -->
+    <!-- <xacro:property name="base_2_HFE_y" value="${104.60 * 0.001}" /> -->
+
+    <xacro:property name="HFE_2_KFE_x" value="${190.0 * 0.001}" />
+    <xacro:property name="HFE_2_KFE_y" value="${44.0 * 0.001}" />
+
+    <xacro:property name="KFE_2_FOOT_x" value="${190.0 * 0.001}" />
+    <xacro:property name="KFE_2_FOOT_y" value="${28.0 * 0.001}" />
+
+    <xacro:property name="ANKLE_2_ROLL1_x" value="${70.0 * 0.001}" />
+    <xacro:property name="ANKLE_2_ROLL1_y" value="${8.0 * 0.001}" />
+
+    <xacro:property name="ANKLE_2_ROLL2_x" value="${44.0 * 0.001}" />
+    <xacro:property name="ANKLE_2_ROLL2_y" value="${19.0 * 0.001}" />
+
+    <xacro:property name="ANKLE_2_ROLL3_x" value="${33.0 * 0.001}" />
+    <xacro:property name="ANKLE_2_ROLL3_y" value="${58.0 * 0.001}" />
+
+    <xacro:property name="PI" value="3.141592" />
+
+    <!-- MULINEX VISUALIZATION meshes -->
+    
+    <xacro:property name="mulinex_module_left_front"
+        value="file://$(find mulinex_description)/meshes//Module_left_front.stl" />
+    <xacro:property name="mulinex_module_left_hind"
+        value="file://$(find mulinex_description)/meshes//Module_left_hind.stl" />
+    <xacro:property name="mulinex_module_2_left"
+        value="file://$(find mulinex_description)/meshes//Module_2_left.stl" />
+    <xacro:property name="mulinex_lower_leg_left"
+        value="file://$(find mulinex_description)/meshes//Lower_leg_left.stl" />
+    <xacro:property name="mulinex_module_right_front"
+        value="file://$(find mulinex_description)/meshes//Module_right_front.stl" />
+    <xacro:property name="mulinex_module_right_hind"
+        value="file://$(find mulinex_description)/meshes//Module_right_hind.stl" />
+    <xacro:property name="mulinex_module_2_right"
+        value="file://$(find mulinex_description)/meshes//Module_2_right.stl" />
+    <xacro:property name="mulinex_lower_leg_right"
+        value="file://$(find mulinex_description)/meshes//Lower_leg_right.stl" />
+
+    <xacro:property name="old_mulinex_base"
+        value="file://$(find mulinex_description)/meshes//old_Body.stl" />
+    <xacro:property name="old_mulinex_module_left_front"
+        value="file://$(find mulinex_description)/meshes//old_Module_left_front.stl" />
+    <xacro:property name="old_mulinex_module_left_hind"
+        value="file://$(find mulinex_description)/meshes//old_Module_left_hind.stl" />
+    <xacro:property name="old_mulinex_module_2_left"
+        value="file://$(find mulinex_description)/meshes//old_Module_2_left.stl" />
+    <xacro:property name="old_mulinex_lower_leg_left"
+        value="file://$(find mulinex_description)/meshes//old_Lower_leg_left.stl" />
+    <xacro:property name="old_mulinex_module_right_front"
+        value="file://$(find mulinex_description)/meshes//old_Module_right_front.stl" />
+    <xacro:property name="old_mulinex_module_right_hind"
+        value="file://$(find mulinex_description)/meshes//old_Module_right_hind.stl" />
+    <xacro:property name="old_mulinex_module_2_right"
+        value="file://$(find mulinex_description)/meshes//old_Module_2_right.stl" />
+    <xacro:property name="old_mulinex_lower_leg_right"
+        value="file://$(find mulinex_description)/meshes//old_Lower_leg_right.stl" />
+
+    <!-- GOAT MESHES -->
+
+    <xacro:property name="goat_lower_leg_LF"
+        value="file://$(find mulinex_description)/meshes//goat_lower_leg_LF.STL" />
+    <xacro:property name="goat_lower_leg_LH"
+        value="file://$(find mulinex_description)/meshes//goat_lower_leg_LH.STL" />
+    <xacro:property name="goat_lower_leg_RF"
+        value="file://$(find mulinex_description)/meshes//goat_lower_leg_RF.STL" />
+    <xacro:property name="goat_lower_leg_RH"
+        value="file://$(find mulinex_description)/meshes//goat_lower_leg_RH.STL" />
+
+    <xacro:property name="goat_upper_foot_LF"
+        value="file://$(find mulinex_description)/meshes//goat_upper_foot_LF.STL" />
+    <xacro:property name="goat_upper_foot_LH"
+        value="file://$(find mulinex_description)/meshes//goat_upper_foot_LH.STL" />
+    <xacro:property name="goat_upper_foot_RF"
+        value="file://$(find mulinex_description)/meshes//goat_upper_foot_RF.STL" />
+    <xacro:property name="goat_upper_foot_RH"
+        value="file://$(find mulinex_description)/meshes//goat_upper_foot_RH.STL" />
+
+    <xacro:property name="goat_lower_foot_LF"
+        value="file://$(find mulinex_description)/meshes//goat_lower_foot_LF.STL" />
+    <xacro:property name="goat_lower_foot_LH"
+        value="file://$(find mulinex_description)/meshes//goat_lower_foot_LH.STL" />
+    <xacro:property name="goat_lower_foot_RF"
+        value="file://$(find mulinex_description)/meshes//goat_lower_foot_RF.STL" />
+    <xacro:property name="goat_lower_foot_RH"
+        value="file://$(find mulinex_description)/meshes//goat_lower_foot_RH.STL" />
+
+    <!-- OMNI MESHES -->
+
+    <xacro:property name="omni_lower_leg_LF"
+        value="file://$(find mulinex_description)/meshes//omni_lower_leg_LF.STL" />
+    <xacro:property name="omni_lower_leg_LH"
+        value="file://$(find mulinex_description)/meshes//omni_lower_leg_LH.STL" />
+    <xacro:property name="omni_lower_leg_RF"
+        value="file://$(find mulinex_description)/meshes//omni_lower_leg_RF.STL" />
+    <xacro:property name="omni_lower_leg_RH"
+        value="file://$(find mulinex_description)/meshes//omni_lower_leg_RH.STL" />
+
+    <xacro:property name="mulinex_roller"
+        value="file://$(find mulinex_description)/meshes//roller_1.STL" />
+    <xacro:property name="mulinex_mec_wheel_LF"
+        value="file://$(find mulinex_description)/meshes//mecanum_wheel_lf.STL" />
+    <xacro:property name="mulinex_mec_wheel_RF"
+        value="file://$(find mulinex_description)/meshes//mecanum_wheel_rf.STL" />
+    <xacro:property name="mulinex_mec_wheel_LH"
+        value="file://$(find mulinex_description)/meshes//mecanum_wheel_lh.STL" />
+    <xacro:property name="mulinex_mec_wheel_RH"
+        value="file://$(find mulinex_description)/meshes//mecanum_wheel_rh.STL" />
+
+    <!--  -->
+    <!-- EACH MACRO CONSISTS OF THE LINK AND ITS PREVIOUS JOINT -->
+    <!--  -->
+
+    <!-- HIP -->
+    <xacro:macro name="hip" params="prefix gazebo jnt_pref simplify_meshes">
+        <!-- Transformation based on the position of each link -->
+        <xacro:if value="${prefix == 'LF'}">
+            <xacro:property name="base_to_hip_xyz" value="${base_2_HAA_x} ${base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'LH'}">
+            <xacro:property name="base_to_hip_xyz" value="${-base_2_HAA_x} ${base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RF'}">
+            <xacro:property name="base_to_hip_xyz" value="${base_2_HAA_x} ${-base_2_HAA_y} 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RH'}">
+            <xacro:property name="base_to_hip_xyz" value="${-base_2_HAA_x} ${-base_2_HAA_y} 0" />
+        </xacro:if>
+
+        <!-- Joint to fix the leg to the base -->
+        <joint name="${prefix}_HAA" type="fixed">
+            <parent link="${jnt_pref}base_link" />
+            <child link="${jnt_pref}${prefix}_SHOULDER" />
+            <origin xyz="${base_to_hip_xyz}" rpy="0 0 0" />
+        </joint>
+        <!-- Shoulder link -->
+        <link name="${prefix}_SHOULDER">
+            <visual>
+                <material name="white" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+            </visual>
+
+            <collision>
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.0945 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+            </collision>
+
+            <inertial>
+                <mass value="0.47669673" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin
+                        xyz="7.2487360e-02 3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin
+                        xyz="-7.2487360e-02 3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="7.2487360e-02 -3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin
+                        xyz="-7.2487360e-02 -3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+            </inertial>
+        </link>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="${prefix}_SHOULDER">
+                <material>Gazebo/White</material>
+                <collision>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1</mu>
+                                <mu2>1</mu2>
+                                <slip1>0</slip1>
+                                <slip2>0</slip2>
+                            </ode>
+                        </friction>
+                        <contact>
+                            <ode>
+                                <kp>1000000.0</kp>
+                                <kd>100.0</kd>
+                                <min_depth>0.001</min_depth>
+                            </ode>
+                        </contact>
+                    </surface>
+                </collision>
+            </gazebo>
+        </xacro:if>
+    </xacro:macro>
+
+    <!-- UPPER LEG -->
+    <xacro:macro name="upper_leg" params="prefix gazebo jnt_pref simplify_meshes">
+        <!-- Transformation based on the position of each link -->
+        <xacro:if value="${prefix == 'LF'}">
+            <xacro:property name="hip_to_upper_leg_xyz" value="${HAA_2_HFE_x} ${HAA_2_HFE_y} 0" />
+            <xacro:property name="hip_to_upper_leg_rpy" value="0 0 0" />
+            <xacro:property name="axis" value="0 1 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'LH'}">
+            <xacro:property name="hip_to_upper_leg_xyz" value="${-HAA_2_HFE_x} ${HAA_2_HFE_y} 0" />
+            <xacro:property name="hip_to_upper_leg_rpy" value="0 0 0" />
+            <xacro:property name="axis" value="0 1 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RF'}">
+            <xacro:property name="hip_to_upper_leg_xyz" value="${HAA_2_HFE_x} ${-HAA_2_HFE_y} 0" />
+            <xacro:property name="hip_to_upper_leg_rpy" value="0 0 0" />
+            <xacro:property name="axis" value="0 -1 0" />
+        </xacro:if>
+        <xacro:if
+            value="${prefix == 'RH'}">
+            <xacro:property name="hip_to_upper_leg_xyz" value="${-HAA_2_HFE_x} ${-HAA_2_HFE_y} 0" />
+            <xacro:property name="hip_to_upper_leg_rpy" value="0 0 0" />
+            <xacro:property name="axis" value="0 -1 0" />
+        </xacro:if>
+        <!-- <xacro:property name="upper_to_lower_leg_rpy" value="0 0 0" /> -->
+
+        <!-- Hip joint -->
+        <joint name="${prefix}_HFE" type="revolute">
+            <parent link="${jnt_pref}${prefix}_SHOULDER" />
+            <child link="${jnt_pref}${prefix}_UPPER_LEG" />
+            <origin xyz="${hip_to_upper_leg_xyz}" rpy="${hip_to_upper_leg_rpy}" />
+            <axis xyz="${axis}" />
+            <limit effort="5.0" lower="-${2*PI}" upper="${2*PI}" velocity="1000" />
+            <!-- <dynamics damping="0.7" friction="100.0" /> -->
+        </joint>
+        <!-- Upper leg link -->
+        <link name="${prefix}_UPPER_LEG">
+            <visual>
+                <material name="white" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_left_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_left_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_front}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_front}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${simplify_meshes}">
+                            <mesh filename="${mulinex_module_right_hind}" />
+                        </xacro:if>
+                        <xacro:unless value="${simplify_meshes}">
+                            <mesh filename="${old_mulinex_module_right_hind}" />
+                        </xacro:unless>
+                    </geometry>
+                </xacro:if>
+            </visual>
+
+            <collision>
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.0945 0.015 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.0945 0.015 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_left_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.0945 -0.015 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_front}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.0945 -0.015 0" rpy="0 0 0" />
+                    <geometry>
+                        <!-- <mesh filename="${mulinex_module_right_hind}" /> -->
+                        <box size="0.269 0.057 0.060" />
+                    </geometry>
+                </xacro:if>
+
+            </collision>
+
+            <inertial>
+                <mass value="0.47669673" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin
+                        xyz="7.2487360e-02 3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin
+                        xyz="-7.2487360e-02 3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="-2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="7.2487360e-02 -3.1582591e-02 2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin
+                        xyz="-7.2487360e-02 -3.1582591e-02 -2.4812434e-03"
+                        rpy="0 0 0" />
+                    <inertia ixx="2.1574269e-04" ixy="-3.3437484e-05"
+                        ixz="2.4284668e-06" iyy="3.0607390e-03"
+                        iyz="-2.0388977e-06" izz="3.0504273e-03" />
+                </xacro:if>
+            </inertial>
+        </link>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="${prefix}_UPPER_LEG">
+                <material>Gazebo/White</material>
+                <collision>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1</mu>
+                                <mu2>1</mu2>
+                                <slip1>0</slip1>
+                                <slip2>0</slip2>
+                            </ode>
+                        </friction>
+                        <contact>
+                            <ode>
+                                <kp>1000000.0</kp>
+                                <kd>100.0</kd>
+                                <min_depth>0.001</min_depth>
+                            </ode>
+                        </contact>
+                    </surface>
+                </collision>
+            </gazebo>
+        </xacro:if>
+    </xacro:macro>
+
+    <!-- LOWER LEG -->
+    <xacro:macro name="lower_leg" params="prefix gazebo jnt_pref simplify_meshes feet_type">
+        <!-- NORMAL FEET CONFIGURATION -->
+        <xacro:if value="${feet_type == 'normal'}">
+            <!-- Transformation based on the position of each link -->
+            <xacro:if value="${prefix == 'LF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'LH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+
+            <xacro:property name="upper_to_lower_leg_rpy" value="0 0 0" />
+
+            <!-- Knee joint -->
+            <joint name="${prefix}_KFE" type="revolute">
+                <parent link="${jnt_pref}${prefix}_UPPER_LEG" />
+                <child link="${jnt_pref}${prefix}_LOWER_LEG" />
+                <origin xyz="${upper_to_lower_leg_xyz}" rpy="${upper_to_lower_leg_rpy}" />
+                <axis xyz="${axis}" />
+                <limit effort="5.0" lower="-${2*PI}" upper="${2*PI}" velocity="1000" />
+                <!-- <dynamics damping="0.7" friction="100.0" /> -->
+            </joint>
+            <!-- Lower leg link -->
+            <link name="${prefix}_LOWER_LEG">
+                <visual>
+                    <material name="white" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_left}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_left}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_right}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_right}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                </visual>
+                <collision name="${prefix}_LOWER_LEG">
+                    <!-- Real meshes -->
+                    <xacro:unless value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:unless>
+                    <!-- Simplified meshes -->
+                    <xacro:if value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0.096 0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="-0.096 0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0.096 -0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="-0.096 -0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:if>
+                </collision>
+                <inertial>
+                    <mass value="0.046942" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.0660893 0.0198901 -1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="1.089102e-05"
+                            ixz="2.468115e-08" iyy="0.00021242"
+                            iyz="2.702972e-09" izz="0.00021154" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="-0.0660893 0.0198901 1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="-1.089102e-05"
+                            ixz="2.46811e-08" iyy="0.0002124295"
+                            iyz="-2.702972e-09" izz="0.0002115478" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.0660893 -0.0198901 -1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="1.089102e-05"
+                            ixz="-2.468115e-08" iyy="0.00021242"
+                            iyz="-2.702972e-09" izz="0.00021154" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin
+                            xyz="-0.0660893 -0.0198901 1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="-1.089102e-05"
+                            ixz="-2.46811e-08" iyy="0.0002124295"
+                            iyz="2.702972e-09" izz="0.0002115478" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_LOWER_LEG">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                </gazebo>
+            </xacro:if>
+
+            <!-- Normal feet -->
+            <joint name="${prefix}_ANKLE" type="fixed">
+                <parent link="${prefix}_LOWER_LEG" />
+                <child link="${prefix}_FOOT" />
+
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="${KFE_2_FOOT_x} ${KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} ${KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="${KFE_2_FOOT_x} ${-KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} ${-KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                </xacro:if>
+            </joint>
+
+            <!-- FOOT LINK -->
+            <link name="${prefix}_FOOT">
+                <xacro:if value="${simplify_meshes}">
+                    <collision>
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <sphere radius="0.015" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_FOOT">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+        </xacro:if>
+        <!-- OMNIWHEELS CONFIGURATION -->
+        <xacro:if value="${feet_type == 'omni'}">
+            <!-- Transformation based on the position of each link -->
+            <xacro:if value="${prefix == 'LF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'LH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+
+            <xacro:property name="upper_to_lower_leg_rpy" value="0 0 0" />
+
+            <!-- Knee joint -->
+            <joint name="${prefix}_KFE" type="revolute">
+                <parent link="${jnt_pref}${prefix}_UPPER_LEG" />
+                <child link="${jnt_pref}${prefix}_LOWER_LEG" />
+                <origin xyz="${upper_to_lower_leg_xyz}" rpy="${upper_to_lower_leg_rpy}" />
+                <axis xyz="${axis}" />
+                <limit effort="5.0" lower="-${2*PI}" upper="${2*PI}" velocity="1000" />
+                <!-- <dynamics damping="0.7" friction="100.0" /> -->
+            </joint>
+            <!-- Lower leg link -->
+            <link name="${prefix}_LOWER_LEG">
+                <visual>
+                    <material name="white" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_lower_leg_left}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_lower_leg_left}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_lower_leg_right}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_lower_leg_right}" />
+                        </geometry>
+                    </xacro:if>
+                </visual>
+                <collision name="${prefix}_LOWER_LEG">
+                    <!-- Real meshes -->
+                    <xacro:unless value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${msphereulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:unless>
+                    <!-- Simplified meshes -->
+                    <xacro:if value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0.096 0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="-0.096 0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0.096 -0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="-0.096 -0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:if>
+                </collision>
+                <inertial>
+                    <mass value="0.30551" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.17801 0.030272 1.8448E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1505E-05"
+                            ixy="-1.5369E-05"
+                            ixz="-4.7734E-08"
+                            iyy="0.00054256"
+                            iyz="-1.9337E-08"
+                            izz="0.00051876" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="-0.17801 0.030272 -1.8448E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1505E-05"
+                            ixy="1.5369E-05"
+                            ixz="-4.7734E-08"
+                            iyy="0.00054256"
+                            iyz="1.9337E-08"
+                            izz="0.00051876" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.17801 -0.030272 -1.8448E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1505E-05"
+                            ixy="1.5369E-05"
+                            ixz="4.7734E-08"
+                            iyy="0.00054256"
+                            iyz="-1.9337E-08"
+                            izz="0.00051876" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin
+                            xyz="-0.17801 -0.030272 1.8448E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1505E-05"
+                            ixy="-1.5369E-05"
+                            ixz="4.7734E-08"
+                            iyy="0.00054256"
+                            iyz="1.9337E-08"
+                            izz="0.00051876" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_LOWER_LEG">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                </gazebo>
+            </xacro:if>
+
+            <!-- Omniwheels -->
+            <joint name="${prefix}_WHEEL_JNT" type="continuous">
+                <parent link="${prefix}_LOWER_LEG" />
+                <child link="${prefix}_WHEEL" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="${KFE_2_FOOT_x} 0.01145 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} 0.01145 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="${KFE_2_FOOT_x} -0.01145 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} -0.01145 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_WHEEL">
+                <visual>
+                    <material name="white" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_mec_wheel_LF}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0  0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_mec_wheel_LH}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_mec_wheel_RF}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_mec_wheel_RH}" />
+                        </geometry>
+                    </xacro:if>
+                </visual>
+                <!-- NO COLLISION FOR THE MECHANUM WHEELS -->
+                <inertial>
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0.047255 -2.335E-07" rpy="0 0 0" />
+                        <mass value="0.078919" />
+                        <inertia ixx="4.9627E-05" ixy="1.7873E-11"
+                            ixz="-2.2576E-09" iyy="7.8948E-05"
+                            iyz="-7.6317E-12" izz="4.9622E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0.047255 -1.5525E-07" rpy="0 0 0" />
+                        <mass value="0.078525" />
+                        <inertia ixx="4.9627E-05" ixy="-2.1009E-12"
+                            ixz="-1.8882E-09" iyy="7.8948E-05"
+                            iyz="4.4431E-12" izz="4.9622E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 -0.047255 -1.5525E-07" rpy="0 0 0" />
+                        <mass value="0.078525" />
+                        <inertia ixx="4.9627E-05" ixy="-2.1009E-12"
+                            ixz="1.8882E-09" iyy="7.8948E-05"
+                            iyz="-4.4431E-12" izz="4.9622E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 -0.047255 -2.3351E-07" rpy="0 0 0" />
+                        <mass value="0.078919" />
+                        <inertia ixx="4.9627E-05" ixy="1.7873E-11"
+                            ixz="-2.2576E-09" iyy="7.8948E-05"
+                            iyz="-7.6317E-12" izz="4.9622E-05" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_WHEEL">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                </gazebo>
+            </xacro:if>
+
+            <link name="${prefix}_Roller1">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.2242E-22"
+                            iyy="7.9113E-07"
+                            iyz="-5.294E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="2.5808E-22"
+                            iyy="7.9113E-07"
+                            iyz="-5.4263E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.9521E-22"
+                            iyy="7.9113E-07"
+                            iyz="-5.0954E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.2242E-22"
+                            iyy="7.9113E-07"
+                            iyz="-5.294E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller1">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <link name="${prefix}_Roller2">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-2.0183E-22"
+                            iyy="7.9113E-07"
+                            iyz="2.8455E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.4228E-22"
+                            iyy="7.9113E-07"
+                            iyz="-1.3301E-21"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-7.6101E-23"
+                            iyy="7.9113E-07"
+                            iyz="1.522E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.7536E-22"
+                            iyy="7.9113E-07"
+                            iyz="2.2499E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Rollert2">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <link name="${prefix}_Roller3">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-2.9448E-22"
+                            iyy="7.9113E-07"
+                            iyz="-3.3749E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-7.6101E-23"
+                            iyy="7.9113E-07"
+                            iyz="2.1176E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-7.6101E-23"
+                            iyy="7.9113E-07"
+                            iyz="1.522E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-2.9448E-22"
+                            iyy="7.9113E-07"
+                            iyz="-3.3749E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller3">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <link name="${prefix}_Roller4">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.0588E-22"
+                            iyy="7.9113E-07"
+                            iyz="3.7058E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="2.4485E-22"
+                            iyy="7.9113E-07"
+                            iyz="5.0293E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="2.4485E-22"
+                            iyy="7.9113E-07"
+                            iyz="5.0293E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.0588E-22"
+                            iyy="7.9113E-07"
+                            iyz="3.7058E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller4">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+
+            <link name="${prefix}_Roller5">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.2242E-22"
+                            iyy="7.9113E-07"
+                            iyz="-1.3235E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-8.2718E-23"
+                            iyy="7.9113E-07"
+                            iyz="3.1764E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-8.2718E-23"
+                            iyy="7.9113E-07"
+                            iyz="3.1764E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.2242E-22"
+                            iyy="7.9113E-07"
+                            iyz="-1.3235E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller5">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+
+            <link name="${prefix}_Roller6">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.1911E-22"
+                            iyy="7.9113E-07"
+                            iyz="1.2573E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="3.6396E-23"
+                            iyy="7.9113E-07"
+                            iyz="0"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.3235E-23"
+                            iyy="7.9113E-07"
+                            iyz="1.3235E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.1911E-22"
+                            iyy="7.9113E-07"
+                            iyz="1.2573E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller6">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+
+            <link name="${prefix}_Roller7">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="5.9557E-23"
+                            iyy="7.9113E-07"
+                            iyz="7.9409E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="2.283E-22"
+                            iyy="7.9113E-07"
+                            iyz="-8.2718E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.9113E-07"
+                            ixy="-9.1022E-13"
+                            ixz="-8.4703E-22"
+                            iyy="7.911E-07"
+                            iyz="-2.8124E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="8.6027E-23"
+                            iyy="7.9113E-07"
+                            iyz="6.6174E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller7">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+
+            <link name="${prefix}_Roller8">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.8529E-22"
+                            iyy="7.9113E-07"
+                            iyz="-3.1764E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="4.3013E-23"
+                            iyy="7.9113E-07"
+                            iyz="-5.294E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="4.3013E-23"
+                            iyy="7.9113E-07"
+                            iyz="-5.294E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.9852E-22"
+                            iyy="7.9113E-07"
+                            iyz="-3.1764E-22"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller8">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+
+            <link name="${prefix}_Roller9">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.3897E-22"
+                            iyy="7.9113E-07"
+                            iyz="-6.6174E-24"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.7205E-22"
+                            iyy="7.9113E-07"
+                            iyz="7.2792E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.7205E-22"
+                            iyy="7.9113E-07"
+                            iyz="7.2792E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="1.3897E-22"
+                            iyy="7.9113E-07"
+                            iyz="-6.6174E-24"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller9">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <link name="${prefix}_Roller10">
+                <xacro:if value="${prefix == 'LF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.6544E-22"
+                            iyy="7.9113E-07"
+                            iyz="-3.9705E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-7.2792E-23"
+                            iyy="7.9113E-07"
+                            iyz="5.294E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-7.2792E-23"
+                            iyy="7.9113E-07"
+                            iyz="5.294E-23"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <inertial>
+                        <origin
+                            xyz="0 0 6.3075E-15"
+                            rpy="0 0 0" />
+                        <mass
+                            value="0.0059616" />
+                        <inertia
+                            ixx="7.911E-07"
+                            ixy="1.2914E-12"
+                            ixz="-1.8529E-22"
+                            iyy="7.9113E-07"
+                            iyz="-6.6174E-24"
+                            izz="2.3532E-07" />
+                    </inertial>
+                    <visual>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                        <material
+                            name="">
+                            <color
+                                rgba="0.29804 0.29804 0.29804 1" />
+                        </material>
+                    </visual>
+                    <collision>
+                        <origin
+                            xyz="0 0 0"
+                            rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${mulinex_roller}" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_Roller9">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <joint name="${prefix}_rol1" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller1" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <axis xyz="0 0 -1" />
+                    <origin xyz="-0.039707 0.04345 -0.012901" rpy="-2.5315 0.60848 2.7559" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <axis xyz="0 0 -1" />
+                    <origin xyz="0.033776 0.04345 0.02454" rpy="-0.46325 -0.87701 -0.46325" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <axis xyz="0 0 -1" />
+                    <origin
+                        xyz="-0.033776 -0.04345 0.024540037909306"
+                        rpy="-0.463248165454369 -0.877005281485064 2.67834448813542" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <axis xyz="0 0 -1" />
+                    <origin xyz="0.039707 -0.04345 -0.012901" rpy="-2.5315 0.60848 -0.38574" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol2" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller2" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <axis xyz="0 0 -1" />
+                    <origin xyz="-0.02454 0.04345 -0.033776" rpy="-3.0918 1.1416 2.3058" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <axis xyz="0 0 -1 " />
+                    <origin xyz="0.0129 0.04345 0.039707" rpy="0.70109 -1.2808 -1.5327" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <axis xyz="0 0 -1 " />
+                    <origin
+                        xyz="-0.0129 -0.04345 0.0397066131814208"
+                        rpy="0.701089986692213 -1.28079549479079 1.60893080425537" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <axis xyz="0 0 -1" />
+                    <origin xyz="0.02454 -0.04345 -0.033776" rpy="-3.0918 1.1416 -0.83583" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol3" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller3" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0.04345 -0.04175" rpy="1.5708 1.119 0.7854" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.012901 0.04345 0.039707" rpy="1.9287 -0.8973 -2.6657" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="0.012901 -0.04345 0.039706613181424"
+                        rpy="1.92871673572211 -0.897296357859899 0.475886236073787" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 -0.04345 -0.04175" rpy="1.5708 1.119 -2.3562" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol4" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller4" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.02454 0.04345 -0.033776" rpy="1.0515 0.57804 0.3775" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.03378 0.04345 0.02454" rpy="2.2155 -0.31149 -2.8367" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="0.03378 -0.04345 0.0245400379093143"
+                        rpy="2.21552653989221 -0.311494977109638 0.304893303643105" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.02454 -0.04345 -0.033776" rpy="1.0515 0.57804 -2.7641" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol5" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller5" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.039707 0.04345 -0.012901" rpy="0.83311 -0.015598 0.31388" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.04175 0.04345 0" rpy="2.4007 0.28978 -2.8388" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin
+                        xyz="0.04175 -0.04345 0"
+                        rpy="2.40070816117922 0.289783882998016 0.302782663929541" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.039707 -0.04345 -0.012901" rpy="0.83311 -0.015598 -2.8277" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol6" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller6" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.039707 0.04345 0.012901" rpy="0.61008 -0.60848 0.38574" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.03378 0.04345 -0.02454" rpy="2.6783 0.87701 -2.6783" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.03378 -0.04345 -0.02454" rpy="2.6783 0.87701 0.46325" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.039707 -0.04345 0.012901" rpy="0.61008 -0.60848 -2.7559" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol7" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller7" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.02454 0.04345 0.033776" rpy="0.049792 -1.1416 0.83583" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.012901 0.04345 -0.039707" rpy="1.7956 0.19988 2.4267" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.012901 -0.04345 -0.039707" rpy="-2.4405 1.2808 1.5327" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.02454 -0.04345 0.033776" rpy="0.049792 -1.1416 -2.3058" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol8" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller8" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0.04345 0.04175" rpy="-1.5708 -1.119 2.3562" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0.012901 0.04345 -0.039707" rpy="-1.2129 0.8973 -0.47589" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="-0.012901 -0.04345 -0.039707" rpy="-1.2129 0.8973 2.6657" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 -0.04345 0.04175" rpy="-1.5708 -1.119 -0.7854" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol9" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller9" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="-0.02454 0.04345 0.033776" rpy="-2.0901 -0.57804 2.7641" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0.03378 0.04345 -0.02454" rpy="-0.92607 0.31149 -0.30489" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="-0.03378 -0.04345 -0.02454" rpy="-0.92607 0.31149 2.8367" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0.02454 -0.04345 0.033776" rpy="-2.0901 -0.57804 -0.3775" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+
+            <joint name="${prefix}_rol10" type="continuous">
+                <parent link="${prefix}_WHEEL" />
+                <child link="${prefix}_Roller10" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="-0.039707 0.04345 0.012901" rpy="-2.3085 0.015598 2.8277" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0.04175 0.04345 0" rpy="-0.74088 -0.28978 -0.30278" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="-0.04175 -0.04345 0" rpy="-0.74088 -0.28978 2.8388" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0.039707 -0.04345 0.012901" rpy="-2.3085 0.015598 -0.31388" />
+                    <axis xyz="0 0 -1" />
+                </xacro:if>
+            </joint>
+        </xacro:if>
+
+        <!-- GOAT FEET CONFIGURATION -->
+        <xacro:if value="${feet_type == 'goat'}">
+            <!-- Transformation based on the position of each link -->
+            <xacro:if value="${prefix == 'LF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'LH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+
+            <xacro:property name="upper_to_lower_leg_rpy" value="0 0 0" />
+
+            <!-- Knee joint -->
+            <joint name="${prefix}_KFE" type="revolute">
+                <parent link="${jnt_pref}${prefix}_UPPER_LEG" />
+                <child link="${jnt_pref}${prefix}_LOWER_LEG" />
+                <origin xyz="${upper_to_lower_leg_xyz}" rpy="${upper_to_lower_leg_rpy}" />
+                <axis xyz="${axis}" />
+                <limit effort="5.0" lower="-${2*PI}" upper="${2*PI}" velocity="1000" />
+                <!-- <dynamics damping="0.7" friction="100.0" /> -->
+            </joint>
+            <!-- Lower leg link -->
+            <link name="${prefix}_LOWER_LEG">
+                <visual>
+                    <material name="white" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${goat_lower_leg_LF}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${goat_lower_leg_LH}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${goat_lower_leg_RF}" />
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 0 0" rpy="0 0 0" />
+                        <geometry>
+                            <mesh filename="${goat_lower_leg_RH}" />
+                        </geometry>
+                    </xacro:if>
+                </visual>
+                <collision name="${prefix}_LOWER_LEG">
+                    <!-- Real meshes -->
+                    <xacro:unless value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0 0 0" rpy="0 0 0" />
+                            <geometry>
+                                <mesh filename="${goat_lower_leg_LF}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="0 0 0" rpy="0 0 0" />
+                            <geometry>
+                                <mesh filename="${goat_lower_leg_LH}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0 0 0" rpy="0 0 0" />
+                            <geometry>
+                                <mesh filename="${goat_lower_leg_RF}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="0 0 0" rpy="0 0 0" />
+                            <geometry>
+                                <mesh filename="${goat_lower_leg_RH}" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:unless>
+                    <!-- Simplified meshes -->
+                    <xacro:if value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0.096 0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="-0.096 0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0.096 -0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="-0.096 -0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:if>
+                </collision>
+                <inertial>
+                    <mass value="0.077969" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.06737 0.021094 3.2849E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.0891E-05"
+                            ixy="-5.9702E-06"
+                            ixz="2.9531E-08"
+                            iyy="8.8296E-05"
+                            iyz="-2.1239E-08"
+                            izz="8.4298E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="-0.07061 0.021157 -0.00024084"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.1198E-05"
+                            ixy="5.9765E-06"
+                            ixz="-4.3856E-07"
+                            iyy="9.1627E-05"
+                            iyz="1.4979E-08"
+                            izz="8.7352E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.066238 -0.021024 0.0013604"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.0543E-05"
+                            ixy="5.9707E-06"
+                            ixz="-8.8742E-07"
+                            iyy="8.6517E-05"
+                            iyz="-2.1795E-08"
+                            izz="8.2676E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <!-- xyz="-0.0660893 -0.0198901 1.552593e-05" -->
+                        <origin
+                            xyz="-0.071647 -0.021225 -8.6959E-05"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.1597E-05"
+                            ixy="-5.9816E-06"
+                            ixz="-2.8226E-07"
+                            iyy="9.3561E-05"
+                            iyz="2.6403E-08"
+                            izz="8.9075E-05" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_LOWER_LEG">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                </gazebo>
+            </xacro:if>
+
+            <!-- Goat feet -->
+            <joint name="${prefix}_ANKLE" type="fixed">
+                <parent link="${prefix}_LOWER_LEG" />
+                <child link="${prefix}_UPPER_FOOT" />
+
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.13283 0.0234 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.13748 0.0236 -0.0099694" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.13269 -0.0236 0.0049542" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.13748 -0.0244 -0.0099694" rpy="0 0 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_UPPER_FOOT">
+                <visual>
+                    <material name="white" />
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${prefix == 'LF'}">
+                            <mesh filename="${goat_upper_foot_LF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <mesh filename="${goat_upper_foot_LH}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <mesh filename="${goat_upper_foot_RF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <mesh filename="${goat_upper_foot_RH}" />
+                        </xacro:if>
+                    </geometry>
+                </visual>
+                <!-- NO COLLISION FOR UPPER FOOT -->
+                <inertial>
+                    <mass value="0.049333" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.029553 -7.714E-08 0.0027446"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.171E-05"
+                            ixy="4.3994E-11"
+                            ixz="-3.6989E-07"
+                            iyy="7.3378E-06"
+                            iyz="6.4266E-12"
+                            izz="1.4874E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="-0.0124 -7.6556E-08 -0.026966"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.4404E-05"
+                            ixy="-1.6619E-11"
+                            ixz="-1.1851E-06"
+                            iyy="7.3378E-06"
+                            iyz="-4.0816E-11"
+                            izz="1.2181E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.029553 -7.6355E-08 0.0027446"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.171E-05"
+                            ixy="4.3514E-11"
+                            ixz="-3.6989E-07"
+                            iyy="7.3378E-06"
+                            iyz="6.1115E-12"
+                            izz="1.4874E-05" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin
+                            xyz="-0.0124 -7.6556E-08 -0.026966"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="1.4404E-05"
+                            ixy="-1.6619E-11"
+                            ixz="-1.1851E-06"
+                            iyy="7.3378E-06"
+                            iyz="-4.0816E-11"
+                            izz="1.2181E-05" />
+                    </xacro:if>
+                </inertial>
+            </link>
+
+            <joint name="${prefix}_FOOT" type="revolute">
+                <parent link="${prefix}_UPPER_FOOT" />
+                <child link="${prefix}_LOWER_FOOT" />
+
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0.049801 0 0.0016013" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="-0.023514 0 -0.04393" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0.049801 0 0.0016013" rpy="0 0 0" />
+                    <axis xyz="0 -1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="-0.023514 0 -0.04393" rpy="0 0 0" />
+                    <axis xyz="0 -1 0" />
+                </xacro:if>
+
+                <limit effort="5.0" lower="-${PI/12}" upper="${PI/18}" velocity="1000" />
+                <!-- <dynamics damping="0.7" spring_reference="0.0" spring_stiffness="50" />
+                <ode implicit_spring_dumper="true"/> -->
+            </joint>
+
+            <link name="${prefix}_LOWER_FOOT">
+                <visual>
+                    <material name="white" />
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${prefix == 'LF'}">
+                            <mesh filename="${goat_lower_foot_LF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <mesh filename="${goat_lower_foot_LH}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <mesh filename="${goat_lower_foot_RF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <mesh filename="${goat_lower_foot_RH}" />
+                        </xacro:if>
+                    </geometry>
+                </visual>
+                <collision>
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <xacro:if value="${prefix == 'LF'}">
+                            <mesh filename="${goat_lower_foot_LF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <mesh filename="${goat_lower_foot_LH}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <mesh filename="${goat_lower_foot_RF}" />
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <mesh filename="${goat_lower_foot_RH}" />
+                        </xacro:if>
+                    </geometry>
+                </collision>
+                <inertial>
+                    <mass value="0.040774" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.013625 -3.8279E-09 0.0094541"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.7648E-06"
+                            ixy="-1.4779E-11"
+                            ixz="-1.7122E-06"
+                            iyy="7.2958E-06"
+                            iyz="-2.4362E-11"
+                            izz="3.9767E-06" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="0.001375 6.8917E-09 -0.016526"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1564E-06"
+                            ixy="-1.2038E-11"
+                            ixz="2.0634E-06"
+                            iyy="7.2958E-06"
+                            iyz="2.2071E-11"
+                            izz="4.5849E-06" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.013625 -3.7015E-10 0.0094541"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.7648E-06"
+                            ixy="-1.4614E-11"
+                            ixz="-1.7122E-06"
+                            iyy="7.2959E-06"
+                            iyz="-2.3594E-11"
+                            izz="3.9767E-06" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin
+                            xyz="0.001375 6.8917E-09 -0.016526"
+                            rpy="0 0 0" />
+                        <inertia
+                            ixx="6.1564E-06"
+                            ixy="-1.2038E-11"
+                            ixz="2.0634E-06"
+                            iyy="7.2958E-06"
+                            iyz="2.2071E-11"
+                            izz="4.5849E-06" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_FOOT">
+                    <implicitSpringDamper>true</implicitSpringDamper>
+                    <springStiffness>5</springStiffness>
+                    <springReference>0.0</springReference>
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.7</mu>
+                                    <mu2>0.7</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1
+                            </collision>
+                        </contact>
+                    </sensor> -->
+
+                </gazebo>
+            </xacro:if>
+        </xacro:if>
+        <!-- TRACK WHEELS CONFIGURATION -->
+        <xacro:if value="${feet_type == 'track'}">
+            <!-- Transformation based on the position of each link -->
+            <xacro:if value="${prefix == 'LF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'LH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RF'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+            <xacro:if
+                value="${prefix == 'RH'}">
+                <xacro:property name="upper_to_lower_leg_xyz"
+                    value="${-HFE_2_KFE_x} ${-HFE_2_KFE_y} 0" />
+                <xacro:property name="axis" value="0 -1 0" />
+            </xacro:if>
+
+            <xacro:property name="upper_to_lower_leg_rpy" value="0 0 0" />
+
+            <!-- Knee joint -->
+            <joint name="${prefix}_KFE" type="revolute">
+                <parent link="${jnt_pref}${prefix}_UPPER_LEG" />
+                <child link="${jnt_pref}${prefix}_LOWER_LEG" />
+                <origin xyz="${upper_to_lower_leg_xyz}" rpy="${upper_to_lower_leg_rpy}" />
+                <axis xyz="${axis}" />
+                <limit effort="5.0" lower="-${2*PI}" upper="${2*PI}" velocity="1000" />
+                <!-- <dynamics damping="0.7" friction="100.0" /> -->
+            </joint>
+            <!-- Lower leg link -->
+            <link name="${prefix}_LOWER_LEG">
+                <visual>
+                    <material name="white" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_left}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_left}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_right}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                        <geometry>
+                            <xacro:if value="${simplify_meshes}">
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </xacro:if>
+                            <xacro:unless value="${simplify_meshes}">
+                                <mesh filename="${old_mulinex_lower_leg_right}" />
+                            </xacro:unless>
+                        </geometry>
+                    </xacro:if>
+                </visual>
+                <collision name="${prefix}_LOWER_LEG">
+                    <!-- Real meshes -->
+                    <xacro:unless value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_left}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0 0 0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <mesh filename="${mulinex_lower_leg_right}" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:unless>
+                    <!-- Simplified meshes -->
+                    <xacro:if value="${simplify_meshes}">
+                        <xacro:if value="${prefix == 'LF'}">
+                            <origin xyz="0.096 0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'LH'}">
+                            <origin xyz="-0.096 0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RF'}">
+                            <origin xyz="0.096 -0.012 0.0" rpy="0 ${-PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                        <xacro:if value="${prefix == 'RH'}">
+                            <origin xyz="-0.096 -0.012 0.0" rpy="0 ${PI/2} 0" />
+                            <geometry>
+                                <box size="0.032 0.024 0.192" />
+                            </geometry>
+                        </xacro:if>
+                    </xacro:if>
+                </collision>
+                <inertial>
+                    <mass value="0.046942" />
+                    <xacro:if value="${prefix == 'LF'}">
+                        <origin
+                            xyz="0.0660893 0.0198901 -1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="1.089102e-05"
+                            ixz="2.468115e-08" iyy="0.00021242"
+                            iyz="2.702972e-09" izz="0.00021154" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'LH'}">
+                        <origin
+                            xyz="-0.0660893 0.0198901 1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="-1.089102e-05"
+                            ixz="2.46811e-08" iyy="0.0002124295"
+                            iyz="-2.702972e-09" izz="0.0002115478" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RF'}">
+                        <origin
+                            xyz="0.0660893 -0.0198901 -1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="1.089102e-05"
+                            ixz="-2.468115e-08" iyy="0.00021242"
+                            iyz="-2.702972e-09" izz="0.00021154" />
+                    </xacro:if>
+                    <xacro:if value="${prefix == 'RH'}">
+                        <origin
+                            xyz="-0.0660893 -0.0198901 1.552593e-05"
+                            rpy="0 0 0" />
+                        <inertia ixx="5.140780e-06" ixy="-1.089102e-05"
+                            ixz="-2.46811e-08" iyy="0.0002124295"
+                            iyz="2.702972e-09" izz="0.0002115478" />
+                    </xacro:if>
+                </inertial>
+            </link>
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_LOWER_LEG">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                </gazebo>
+            </xacro:if>
+
+            <!-- Track wheels -->
+            <joint name="${prefix}_WHEEL_JNT" type="continuous">
+                <parent link="${prefix}_LOWER_LEG" />
+                <child link="${prefix}_WHEEL_1" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="${KFE_2_FOOT_x} ${KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} ${KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="${KFE_2_FOOT_x} ${-KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="${-KFE_2_FOOT_x} ${-KFE_2_FOOT_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_WHEEL_1">
+                <visual>
+                    <material name="white" />
+                    <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                    <geometry>
+                        <cylinder length="0.10" radius="0.015" />
+                    </geometry>
+                </visual>
+                <xacro:if value="${simplify_meshes}">
+                    <collision>
+                        <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                        <geometry>
+                            <cylinder length="0.10" radius="0.015" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+
+            <joint name="${prefix}_ROLLER_1" type="continuous">
+                <parent link="${prefix}_WHEEL_1" />
+                <child link="${prefix}_WHEEL_2" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="${ANKLE_2_ROLL1_x} ${ANKLE_2_ROLL1_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="${-ANKLE_2_ROLL1_x} ${ANKLE_2_ROLL1_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="${ANKLE_2_ROLL1_x} ${-ANKLE_2_ROLL1_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="${-ANKLE_2_ROLL1_x} ${-ANKLE_2_ROLL1_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_WHEEL_2">
+                <visual>
+                    <material name="white" />
+                    <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                    <geometry>
+                        <cylinder length="0.10" radius="0.005" />
+                    </geometry>
+                </visual>
+                <xacro:if value="${simplify_meshes}">
+                    <collision>
+                        <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                        <geometry>
+                            <cylinder length="0.10" radius="0.005" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+
+            <joint name="${prefix}_ROLLER_2" type="continuous">
+                <parent link="${prefix}_WHEEL_1" />
+                <child link="${prefix}_WHEEL_3" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="${ANKLE_2_ROLL2_x} ${ANKLE_2_ROLL2_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="${-ANKLE_2_ROLL2_x} ${ANKLE_2_ROLL2_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="${ANKLE_2_ROLL2_x} ${-ANKLE_2_ROLL2_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="${-ANKLE_2_ROLL2_x} ${-ANKLE_2_ROLL2_y} 0" rpy="0 0 0" />
+                    <axis xyz="0 1 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_WHEEL_3">
+                <visual>
+                    <material name="white" />
+                    <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                    <geometry>
+                        <cylinder length="0.10" radius="0.005" />
+                    </geometry>
+                </visual>
+                <xacro:if value="${simplify_meshes}">
+                    <collision>
+                        <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                        <geometry>
+                            <cylinder length="0.10" radius="0.005" />
+                        </geometry>
+                    </collision>
+                </xacro:if>
+            </link>
+
+            <xacro:if value="${gazebo}">
+                <gazebo reference="${prefix}_WHEEL_1">
+                    <material>Gazebo/White</material>
+                    <collision>
+                        <surface>
+                            <friction>
+                                <ode>
+                                    <mu>0.6</mu>
+                                    <mu2>0.6</mu2>
+                                    <slip1>0</slip1>
+                                    <slip2>0</slip2>
+                                </ode>
+                            </friction>
+                            <contact>
+                                <ode>
+                                    <kp>10000.0</kp>
+                                    <kd>100.0</kd>
+                                    <min_depth>0.001</min_depth>
+                                </ode>
+                            </contact>
+                        </surface>
+                    </collision>
+                    <!-- <sensor name="${prefix}_contactsensor_sensor" type="contact">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <contact>
+                            <collision>
+                                ${prefix}_LOWER_LEG_fixed_joint_lump__${prefix}_FOOT_collision_1</collision>
+                        </contact>
+
+                    </sensor> -->
+                </gazebo>
+            </xacro:if>
+
+            <joint name="${prefix}_DIRECTION" type="fixed">
+                <parent link="${prefix}_WHEEL_1" />
+                <child link="${prefix}_INDICATOR" />
+                <xacro:if value="${prefix == 'LF'}">
+                    <origin xyz="0 0.0501 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'LH'}">
+                    <origin xyz="0 0.0501 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RF'}">
+                    <origin xyz="0 -0.0501 0" rpy="0 0 0" />
+                </xacro:if>
+                <xacro:if value="${prefix == 'RH'}">
+                    <origin xyz="0 -0.0501 0" rpy="0 0 0" />
+                </xacro:if>
+            </joint>
+
+            <link name="${prefix}_INDICATOR">
+                <visual>
+                    <origin xyz="0 0 0.0075" rpy="0 0 0" />
+                    <geometry>
+                        <box size="0.004 0.0001 0.015" />
+                    </geometry>
+                    <material name="red" />
+                </visual>
+            </link>
+        </xacro:if>
+    </xacro:macro>
+
+</robot>

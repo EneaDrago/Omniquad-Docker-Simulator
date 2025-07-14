@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- <xacro:include filename="$(find mulinex_description)/urdf/material.xacro" /> -->
+    <xacro:macro name="omnicar_gaz_hw" params=" gazebo ">
+        <gazebo reference="base_link">
+            <material>Gazebo/White</material>
+        </gazebo>
+        <gazebo>
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <parameters>$(find mulinex_gazebo)/config/mulinex_gazebo_sim_jnt_PD_IMU.yaml</parameters>
+            </plugin>
+        </gazebo>
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <joint name="LH_WHEEL">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            
+            <joint name="LF_WHEEL">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value"> 0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            <joint name="RH_WHEEL">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+            
+            <joint name="RF_WHEEL">
+                <command_interface name="effort" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort" />
+            </joint>
+           
+        </ros2_control>
+        <gazebo reference="base_link">
+            <sensor name="br_imu" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <imu>
+                <angular_velocity>
+                    <x>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>2e-4</stddev>
+                    </noise>
+                    </x>
+                    <y>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>2e-4</stddev>
+                    </noise>
+                    </y>
+                    <z>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>2e-4</stddev>
+                    </noise>
+                    </z>
+                </angular_velocity>
+                <linear_acceleration>
+                    <x>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>1.7e-2</stddev>
+                    </noise>
+                    </x>
+                    <y>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>1.7e-2</stddev>
+                    </noise>
+                    </y>
+                    <z>
+                    <noise type="gaussian">
+                        <mean>0.0</mean>
+                        <stddev>1.7e-2</stddev>
+                    </noise>
+                    </z>
+                </linear_acceleration>
+                </imu>
+                <!-- <plugin name="bytes_imu" filename="libgazebo_ros_imu_sensor.so">
+                    <ros>
+                        <namespace>imu</namespace>
+                        <remapping>~/out:=data</remapping>
+                    </ros>
+                    <initial_orientation_as_reference>false</initial_orientation_as_reference>
+                </plugin> -->
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+</robot>

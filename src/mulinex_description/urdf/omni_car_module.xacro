@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find mulinex_description)/urdf/hip_module.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/wheel.xacro" />
+    <xacro:property name="PI" value="3.141592" />
+
+    <xacro:macro name="omni_mod" params="prefix gazebo jnt_pref simplify_meshes">
+        <!-- Module 1 -->
+        <xacro:hip
+            prefix="${prefix}"
+            gazebo="${gazebo}"
+            jnt_pref=""
+            simplify_meshes="${simplify_meshes}"
+        />
+        <!-- wheel -->
+        <xacro:wheel
+            prefix="${prefix}"
+            gazebo="${gazebo}"
+        />
+        
+    </xacro:macro>
+
+</robot>

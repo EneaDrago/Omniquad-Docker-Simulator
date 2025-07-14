@@ -1,0 +1,9 @@
+<library path="ik_quad_foot_control">
+  <class name="ik_quad_foot_control/IK_Quad_Foot_Controller" 
+    type="ik_quad_foot_control::IK_Quad_Foot_Controller"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>
+    PD Joint controller
+    </description>
+  </class>
+</library>
