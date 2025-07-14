@@ -18,7 +18,7 @@ Nvidia-Container-Toolkit: follow the nvidia-container-toolkit following [this](h
 
 ``` docker compose up -d ```
 
-``` docker compose exec ros2_shell bash ```
+``` docker compose exec ros2_humble_sim ```
 
 ## NVIDIA stuff test 
 
