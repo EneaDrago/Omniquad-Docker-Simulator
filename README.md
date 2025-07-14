@@ -46,3 +46,10 @@ This terminal is used to run the node to move the robot
 ``` source install/setup.bash ```
 
 ``` ros2 run mulinex_ignition getup_node ```
+
+
+## TROUBLESHOOT
+If ``` colcon build ``` does not work, try to do: 
+``` docker rm -f ros2_humble_simulator``` 
+``` docker compose up -d``` 
+and then, again: ``` docker compose exec ros2_humble_sim bash```
