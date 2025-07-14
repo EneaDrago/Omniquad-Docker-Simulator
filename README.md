@@ -19,7 +19,9 @@ Nvidia-Container-Toolkit: follow the nvidia-container-toolkit following [this](h
 ``` docker compose up -d ```
 
 ``` docker compose exec ros2_humble_sim bash```
+
 This command launches a docker with ros inside it. The first time you open it, you have to run 
+
 ``` colcon build```
 
 
@@ -31,11 +33,16 @@ To test the correct isntallation of the nvidia support you have to start the con
 
 
 ## LUNCH ROBOT SIMULATION
-### TERMINAL 1:
+
+#### TERMINAL 1:
 This terminal is used to run Gazebo
+
 ``` source install/setup.bash ```
+
 ``` ros2 launch mulinex_ignition gz_harmonic_sim_w_rbt.launch.py ```
-### TERMINAL 2:
+#### TERMINAL 2:
 This terminal is used to run the node to move the robot
+
 ``` source install/setup.bash ```
+
 ``` ros2 run mulinex_ignition getup_node ```
