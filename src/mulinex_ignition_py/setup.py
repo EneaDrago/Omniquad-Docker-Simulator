@@ -20,7 +20,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'getup = mulinex_ignition_py.getup:main',            
+            'getup = mulinex_ignition_py.getup:main',
+            'gostraighton = mulinex_ignition_py.gostraighton:main',    
+            'walking = mulinex_ignition_py.walking:main',          
         ],
     },
 )
