@@ -27,7 +27,7 @@ public:
     };
 
     // “Get up” angles in radians:
-    const double hip  = M_PI * 120.0 / 180.0;
+    const double hip  = M_PI * 150.0 / 180.0;
     const double knee = M_PI *  60.0  / 180.0;
     target_positions_ = {
       hip,   -hip,

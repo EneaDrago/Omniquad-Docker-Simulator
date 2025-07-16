@@ -1,5 +1,4 @@
 {
-    "cmake.sourceDirectory": "/home/enea/docker_simulator/src/mulinex_description",
     "python.autoComplete.extraPaths": [
         "/home/simone/docker_simulator/install/rlg_quad_controller/lib/python3.10/site-packages",
         "/home/simone/docker_simulator/install/pi3hat_moteus_int_msgs/local/lib/python3.10/dist-packages",

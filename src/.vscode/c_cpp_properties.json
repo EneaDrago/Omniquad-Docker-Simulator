@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/simone/docker_simulator/install/omni_mulinex_joystic/include/**",
+        "/home/simone/docker_simulator/install/pi3hat_moteus_int_msgs/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/simone/docker_simulator/src/Omni_Mulinex_Joystic_OPC/omni_mulinex_joystic/include/**",
+        "/home/simone/docker_simulator/src/Pi3Hat_Controllers/src/ik_quad_foot_control/include/**",
+        "/home/simone/docker_simulator/src/Pi3Hat_Controllers/src/omni_vel_controller/include/**",
+        "/home/simone/docker_simulator/src/rbt_pd_cnt/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
