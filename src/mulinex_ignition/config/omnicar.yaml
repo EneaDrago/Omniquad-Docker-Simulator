@@ -26,3 +26,14 @@ omni_control:
     pub_odom: false
     sim: true
     use_sim_time: True
+
+    joints:
+      - LF_WHEEL_JNT
+      - LH_WHEEL_JNT
+      - RF_WHEEL_JNT
+      - RH_WHEEL_JNT
+    wheels:
+      - LF_WHEEL
+      - LH_WHEEL
+      - RF_WHEEL
+      - RH_WHEEL

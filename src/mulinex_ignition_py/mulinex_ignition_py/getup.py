@@ -14,7 +14,7 @@ class GetUpNode(Node):
         self.joint_names = [
             "LF_HFE", "LH_HFE", "RF_HFE", "RH_HFE",
             "LF_KFE", "LH_KFE", "RF_KFE", "RH_KFE"
-            "LF_ANKLE", "LH_ANKLE", "RF_ANKLE", "RH_ANKLE"
+            "LF_WHEEL_JNT", "LH_WHEEL_JNT", "RF_WHEEL_JNT", "RH_WHEEL_JNT"
         ]
 
         hip = math.pi * 120.0 / 180.0

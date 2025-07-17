@@ -204,11 +204,24 @@ class InferenceController(Node):
         """
         Callback function for inference timer. Infers joints target_pos from model and publishes it.
         """
-        
+        +---------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (44,)) |
++-----------+---------------------------------+-----------+
+|   Index   | Name                            |   Shape   |
++-----------+---------------------------------+-----------+
+|     0     | base_lin_vel                    |    (3,)   |
+|     1     | base_ang_vel                    |    (3,)   |
+|     2     | projected_gravity               |    (3,)   |
+|     3     | velocity_commands               |    (3,)   |
+|     4     | joint_pos                       |    (8,)   |
+|     5     | joint_vel                       |   (12,)   |
+|     6     | actions                         |   (12,)   |
++-----------+---------------------------------+-----------+
+
         obs_list = np.concatenate((
-            self.projected_gravity,
             self.base_quat,
             self.base_vel * self.angularVelocityScale,
+            self.projected_gravity,
             (self.cmd_vel * self.cmd_vel_scale).reshape((2,1)), 
             np.fromiter(self.joint_pos.values(),dtype=float).reshape((self.njoint,1)) *
                 self.dofPositionScale,

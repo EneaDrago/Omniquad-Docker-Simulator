@@ -45,6 +45,16 @@ omni_control:
     wheel_rad: 0.03875
     pub_odom: true
     sim: true
+    joints:
+      - LF_WHEEL_JNT
+      - LH_WHEEL_JNT
+      - RF_WHEEL_JNT
+      - RH_WHEEL_JNT
+    wheels:
+      - LF_WHEEL
+      - LH_WHEEL
+      - RF_WHEEL
+      - RH_WHEEL
 
 pd_controller:
   ros__parameters:
@@ -88,3 +98,24 @@ pd_controller:
       - 0.0
       - 0.0
     use_sim_time: True
+
+d_controller:
+  ros__parameters:
+      joint:
+        - LF_WHEEL_JNT
+        - LH_WHEEL_JNT
+        - RF_WHEEL_JNT
+        - RH_WHEEL_JNT
+  
+      K_d:
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+  
+      init_pos:
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      use_sim_time: True
