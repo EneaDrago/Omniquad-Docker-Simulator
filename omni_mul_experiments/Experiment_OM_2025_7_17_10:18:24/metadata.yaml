@@ -1,0 +1,26 @@
+rosbag2_bagfile_information:
+  version: 5
+  storage_identifier: sqlite3
+  duration:
+    nanoseconds: 103099830026
+  starting_time:
+    nanoseconds_since_epoch: 1752747504457856211
+  message_count: 1032
+  topics_with_message_count:
+    - topic_metadata:
+        name: Joystic_Command
+        type: pi3hat_moteus_int_msgs/msg/OmniMulinexCommand
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 1032
+  compression_format: ""
+  compression_mode: ""
+  relative_file_paths:
+    - Experiment_OM_2025_7_17_10:18:24_0.db3
+  files:
+    - path: Experiment_OM_2025_7_17_10:18:24_0.db3
+      starting_time:
+        nanoseconds_since_epoch: 1752747504457856211
+      duration:
+        nanoseconds: 103099830026
+      message_count: 1032

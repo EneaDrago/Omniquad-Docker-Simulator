@@ -3,7 +3,7 @@ task:
   physics_engine: ${..physics_engine}
   env:
     numEnvs: ${resolve_default:2048,${...num_envs}}
-    numObservations: 44
+    numObservations: 41
     numStates: 266
     numActions: 12
     envSpacing: 3.0

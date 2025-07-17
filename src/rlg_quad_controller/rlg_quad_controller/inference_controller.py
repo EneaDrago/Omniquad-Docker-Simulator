@@ -55,7 +55,7 @@ class InferenceController(Node):
 
         self.linearVelocityScale    = params['task']['env']['learn']['linearVelocityScale'] # 2.0
         self.angularVelocityScale   = params['task']['env']['learn']['angularVelocityScale'] #0.25
-        self.cmd_vel_scale  = np.array([self.linearVelocityScale, self.angularVelocityScale]).reshape((2,1))
+        self.cmd_vel_scale  = np.array([self.linearVelocityScale, self.linearVelocityScale, self.angularVelocityScale]).reshape((3,1))
         self.cmd_vel_min    = np.array([-1.0, -1.0]).reshape((2,1))
         self.cmd_vel_max    = np.array([1.0, 1.0]).reshape((2,1))
         
@@ -136,8 +136,8 @@ class InferenceController(Node):
 
         self.previous_action = np.zeros((self.njoint,1))
         
-        self.base_vel = np.zeros((3,1))
-        self.cmd_vel = np.zeros((2,1)) # speed and heading
+        self.base_ang_vel = np.zeros((3,1))
+        self.cmd_vel = np.zeros((3,1)) # speed and heading
         self.base_quat = np.zeros((4,1))
         self.projected_gravity = np.zeros((3,1))
         self.yawboia = 0.0
@@ -152,12 +152,12 @@ class InferenceController(Node):
 
 
     def cmd_vel_callback(self, msg):
-        self.cmd_vel = np.array([msg.linear.x, msg.angular.z]).reshape((2,1))
+        self.cmd_vel = np.array([msg.linear.x, msg.linear.y, msg.angular.z]).reshape((3,1))
         np.clip(self.cmd_vel, self.cmd_vel_min, self.cmd_vel_max)
 
 
     def imu_callback(self, msg):
-        self.base_vel = np.array([msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z]).reshape((3,1))
+        self.base_ang_vel = np.array([msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z]).reshape((3,1))
         orientation_list = [msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z]
         # rclpy.logging.get_logger('rclpy.node').info('QUAT: {}'.format(orientation_list))
         yaw, pitch, roll = t3d.euler.quat2euler(orientation_list,axes='szyx')
@@ -204,31 +204,29 @@ class InferenceController(Node):
         """
         Callback function for inference timer. Infers joints target_pos from model and publishes it.
         """
-        +---------------------------------------------------------+
-| Active Observation Terms in Group: 'policy' (shape: (44,)) |
-+-----------+---------------------------------+-----------+
-|   Index   | Name                            |   Shape   |
-+-----------+---------------------------------+-----------+
-|     0     | base_lin_vel                    |    (3,)   |
-|     1     | base_ang_vel                    |    (3,)   |
-|     2     | projected_gravity               |    (3,)   |
-|     3     | velocity_commands               |    (3,)   |
-|     4     | joint_pos                       |    (8,)   |
-|     5     | joint_vel                       |   (12,)   |
-|     6     | actions                         |   (12,)   |
-+-----------+---------------------------------+-----------+
+        # +---------------------------------------------------------+
+        # | Active Observation Terms in Group: 'policy' (shape: (41,)) |
+        # +-----------+---------------------------------+-----------+
+        # |   Index   | Name                            |   Shape   |
+        # +-----------+---------------------------------+-----------+
+        # |     0     | base_ang_vel                    |    (3,)   |
+        # |     1     | projected_gravity               |    (3,)   |
+        # |     2     | velocity_commands               |    (3,)   |
+        # |     3     | joint_pos                       |    (8,)   |
+        # |     4     | joint_vel                       |   (12,)   |
+        # |     5     | actions                         |   (12,)   |
+        # +-----------+---------------------------------+-----------+
 
         obs_list = np.concatenate((
-            self.base_quat,
-            self.base_vel * self.angularVelocityScale,
+            self.base_ang_vel * self.angularVelocityScale,
             self.projected_gravity,
-            (self.cmd_vel * self.cmd_vel_scale).reshape((2,1)), 
+            (self.cmd_vel * self.cmd_vel_scale).reshape((3,1)), 
             np.fromiter(self.joint_pos.values(),dtype=float).reshape((self.njoint,1)) *
                 self.dofPositionScale,
             np.fromiter(self.joint_vel.values(),dtype=float).reshape((self.njoint,1)) *
                 self.dofVelocityScale,
             self.previous_action, 
-        )).reshape((1,44))
+        )).reshape((1,41))
         # rclpy.logging.get_logger('rclpy.node').info('Observation vector: {}'.format(obs_list))
         
         # try:
