@@ -215,7 +215,7 @@ class InferenceController(Node):
             np.fromiter(self.joint_vel.values(),dtype=float).reshape((self.njoint,1)) *
                 self.dofVelocityScale,
             self.previous_action, 
-        )).reshape((1,36))
+        )).reshape((1,44))
         # rclpy.logging.get_logger('rclpy.node').info('Observation vector: {}'.format(obs_list))
         
         # try:

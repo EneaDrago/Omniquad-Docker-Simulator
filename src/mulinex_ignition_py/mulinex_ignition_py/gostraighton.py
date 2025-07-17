@@ -3,7 +3,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64MultiArray
 
 class GoStraightOn(Node):
 
@@ -14,7 +13,7 @@ class GoStraightOn(Node):
         self.leg_pub = self.create_publisher(JointState, '/pd_controller/command', 10)
 
         # Publisher 2: per il controllo velocità delle ruote
-        self.wheel_pub = self.create_publisher(Float64MultiArray, '/wheel_velocity_controller/commands', 10)
+        self.wheel_pub = self.create_publisher(Twist, '/omni_control/cmd_vel', 10)
 
         self.joint_names = [
             "LF_HFE", "LH_HFE", "RF_HFE", "RH_HFE",     # anche
@@ -30,9 +29,10 @@ class GoStraightOn(Node):
            -hip,    knee,            # Left HIP back, Left KNEE back
            -hip,   knee,             # Right HIP front, Right KNEE front
             hip,  -knee,             # Right HIP back, Right KNEE back
+
         ]
 
-        self.wheel_speed = 500.0  # rad/s
+        self.forward_speed = 10.0  # m/s — modifica in base al robot
 
         # Timer per pubblicare comandi a 50 Hz
         self.timer_leg = self.create_timer(0.02, self.send_command_leg)
@@ -51,8 +51,11 @@ class GoStraightOn(Node):
         self.leg_pub.publish(msg)
 
     def send_command_wheel(self):
-        msg = Float64MultiArray()
-        msg.data = [self.wheel_speed] * 4  # LF, LH, RF, RH
+        msg = Twist()
+        msg.linear.x = self.forward_speed
+        msg.linear.y = 0.0
+        msg.angular.z = 0.0
+
         self.wheel_pub.publish(msg)
 
 

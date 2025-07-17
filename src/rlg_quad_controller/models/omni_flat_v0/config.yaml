@@ -1,11 +1,11 @@
 task:
-  name: MulinexTerrain
+  name: OmniquadFlat
   physics_engine: ${..physics_engine}
   env:
     numEnvs: ${resolve_default:2048,${...num_envs}}
-    numObservations: 36
+    numObservations: 44
     numStates: 266
-    numActions: 8
+    numActions: 12
     envSpacing: 3.0
     terrain:
       staticFriction: 1.0
@@ -51,54 +51,54 @@ task:
       - -1.0
       - 1.0
       yaw:
-      - -3.14
-      - 3.14
+      - -1
+      - 1
     control:
-      stiffness:
-      - 50.0
-      - 5.0
-      damping:
-      - 2.0
-      - 0.025
-      actionScale: 0.5
-      decimation: 1
+      controlLeg:
+        stiffness:
+        - 100.7
+        - 100.7
+        damping:
+        - 10.0
+        - 10.0
+        actionScale: 0.1
+        decimation: 1
+      controlWheel:
+        stiffness:
+        - 0.0
+        - 0.0
+        damping:
+        - 10.0
+        - 10.0
+        actionScale: 50
+        decimation: 1
     defaultJointAngles:
-      LF_HFE: 2.094
-      LH_HFE: -2.094
-      RF_HFE: -2.094
-      RH_HFE: 2.094
-      LF_KFE: -0.7854
-      LH_KFE: 0.7854
-      RF_KFE: 0.7854
-      RH_KFE: -0.7854
+      LF_HFE: 2.0
+      LH_HFE: -2.0
+      RF_HFE: -2.0
+      RH_HFE: 2.0
+      LF_KFE: -1.2
+      LH_KFE: 1.2
+      RF_KFE: 1.2
+      RH_KFE: -1.2
+      LF_ANKLE: 0.0
+      LH_ANKLE: 0.0
+      RF_ANKLE: 0.0
+      RH_ANKLE: 0.0
     learn:
-      terminalReward: 0.0
-      linearVelocityXYRewardScale: 1.0
-      linearVelocityZRewardScale: -4.0
+      linearVelocityXYRewardScale: 3.0
+      linearVelocityZRewardScale: -5.0
       angularVelocityXYRewardScale: -0.05
-      angularVelocityZRewardScale: 0.5
+      angularVelocityZRewardScale: 1
       orientationRewardScale: -0.0
-      torqueRewardScale: -2.0e-05
-      jointAccRewardScale: -0.0005
-      baseHeightRewardScale: -0.0
-      actionRateRewardScale: -0.01
-      fallenOverRewardScale: -1.0
-      hipRewardScale: -0.0
-      linearVelocityScale: 2.0
-      angularVelocityScale: 0.25
+      torqueRewardScale: -1.0e-6
+      jointAccRewardScale: -2.5e-8
+      baseHeightRewardScale: -0.5
+      actionRateRewardScale: -0.2
+      linearVelocityScale: 1.0
+      angularVelocityScale: 1.0
       dofPositionScale: 1.0
       dofVelocityScale: 0.05
-      heightMeasurementScale: 2.5
-      addNoise: true
-      noiseLevel: 1.0
-      dofPositionNoise: 0.01
-      dofVelocityNoise: 1.5
-      linearVelocityNoise: 0.1
-      angularVelocityNoise: 0.2
-      gravityNoise: 0.05
-      heightMeasurementNoise: 0.06
-      pushInterval_s: 15
-      episodeLength_s: 20
   sim:
     dt: 0.005
     up_axis: z
@@ -184,7 +184,7 @@ train:
     load_checkpoint: ${if:${...checkpoint},True,False}
     load_path: ${...checkpoint}
     config:
-      name: ${resolve_default:MulinexTerrain,${....experiment}}
+      name: ${resolve_default:OmniquadFlat,${....experiment}}
       full_experiment_name: ${.name}
       device: ${....rl_device}
       device_name: ${....rl_device}

@@ -1,7 +1,8 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node
+from launch_ros.actions import Nodephysics_engine,Node
+
 
 def generate_launch_description():
     ld = LaunchDescription()
@@ -15,15 +16,15 @@ def generate_launch_description():
     config_path = os.path.join(
         get_package_share_directory('rlg_quad_controller'),
         'models',
-        'RealGaitRew2NoHeading',
+        'omni_flat_v0',
         'config.yaml'
         )
     
     weights_path = os.path.join(
         get_package_share_directory('rlg_quad_controller'),
         'models',
-        'RealGaitRew2NoHeading',
-        'RealGaitRew2NoHeading.pth'
+        'omni_flat_v0',
+        'omniquad_flat.pth'
         )
     
     node=Node(
