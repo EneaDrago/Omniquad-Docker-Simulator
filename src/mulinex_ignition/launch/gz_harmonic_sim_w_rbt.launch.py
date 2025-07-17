@@ -235,16 +235,16 @@ def generate_launch_description():
             conf_file_path],
     )
 
-    joy_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                PathJoinSubstitution([
-                    FindPackageShare('omni_mulinex_joystic'),
-                    'launch',
-                    'start_joy_sim.launch.py'
-                ])
-            ]),
-            condition=IfCondition(joystic_teleop)
-        )
+    # joy_launch = IncludeLaunchDescription(
+    #         PythonLaunchDescriptionSource([
+    #             PathJoinSubstitution([
+    #                 FindPackageShare('omni_mulinex_joystic'),
+    #                 'launch',
+    #                 'start_joy_sim.launch.py'
+    #             ])
+    #         ]),
+    #         condition=IfCondition(joystic_teleop)
+    #     )
     
     # add arguments
     ld.add_action(gz_verbosity_arg)
@@ -255,7 +255,7 @@ def generate_launch_description():
     ld.add_action(control_cfg_pkg_arg)
     ld.add_action(control_cfg_file_name_arg)
     ld.add_action(use_lidar_3D_arg)
-    ld.add_action(joystic_teleop_arg)
+    # ld.add_action(joystic_teleop_arg)
     ld.add_action(robot_namespace_arg)
     ld.add_action(pub_tf_gt_arg)
 
@@ -296,7 +296,7 @@ def generate_launch_description():
             )
         )
     )
-    ld.add_action(
-        joy_launch
-    )
+    # ld.add_action(
+    #     joy_launch
+    # )
     return ld

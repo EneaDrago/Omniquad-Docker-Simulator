@@ -25,10 +25,10 @@ joint_state_broadcaster_1:
       - LH_KFE
       - RF_KFE
       - RH_KFE
-      - RF_WHEEL_JNT
-      - RH_WHEEL_JNT
-      - LF_WHEEL_JNT
-      - LH_WHEEL_JNT
+      # - LF_WHEEL_JNT
+      # - LH_WHEEL_JNT
+      # - RF_WHEEL_JNT
+      # - RH_WHEEL_JNT
     use_sim_time: True
 
 ik_leg:
@@ -49,23 +49,22 @@ omni_control:
     wheel_rad: 0.03875
     pub_odom: true
     sim: true
-    joints:
-      - LF_WHEEL_JNT
-      - LH_WHEEL_JNT
-      - RF_WHEEL_JNT
-      - RH_WHEEL_JNT
 
 pd_controller:
   ros__parameters:
     joint:
-      - LF_HFE
-      - LF_KFE
-      - LH_HFE
-      - LH_KFE
-      - RF_HFE
-      - RF_KFE
-      - RH_HFE
-      - RH_KFE
+      - LF_HFE        # Left HIP Front
+      - LF_KFE        # Left KNEE Front
+      - LH_HFE        # Left HIP Back
+      - LH_KFE        # Left KNEE Back
+      - RF_HFE        # Right HIP Front
+      - RF_KFE        # Right KNEE Front
+      - RH_HFE        # Right HIP Back
+      - RH_KFE        # Right KNEE Back
+      # - LF_WHEEL_JNT    
+      # - LH_WHEEL_JNT
+      # - RF_WHEEL_JNT
+      # - RH_WHEEL_JNT
  
     K_d:
       - 0.8
@@ -76,6 +75,10 @@ pd_controller:
       - 0.8
       - 0.8
       - 0.8
+      # - 0.8   # Wheel joints
+      # - 0.8
+      # - 0.8
+      # - 0.8
       
     K_p:
       - 20.9
@@ -86,14 +89,23 @@ pd_controller:
       - 20.9
       - 20.9
       - 20.9
+      # - 0.0     # Wheel joints
+      # - 0.0
+      # - 0.0
+      # - 0.0
  
-    init_pos:
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
+ # Nota: Hip: 120° = 2.094 rad, Knee: 60° = 1.047 rad
+    init_pos:   # NOTA! Mettere init_pos diverso da 0 
+      - 2.094
+      - -1.047
+      - -2.094
+      - 1.047
+      - -2.094
+      - 1.047
+      - 2.094
+      - -1.047
+      # - 0.0   # Wheel joints
+      # - 0.0
+      # - 0.0
+      # - 0.0
     use_sim_time: True

@@ -45,7 +45,7 @@ This terminal is used to run the node to move the robot
 
 ``` source install/setup.bash ```
 
-``` ros2 run mulinex_ignition getup_node ```
+``` ros2 run mulinex_ignition-py getup ```
 
 
 ## TROUBLESHOOT
@@ -56,3 +56,20 @@ If ``` colcon build ``` does not work the first time you launch it during the in
 ``` docker compose up -d``` 
 
 and then, again: ``` docker compose exec ros2_humble_sim bash```
+
+
+
+## Move the robot
+There are two controllers: 
+- "omni_control" that, given a reference velocity, solves the inverse kinematics and moves the wheels to target the reference velocity.
+    - topic from which it reads: /omni_control/command
+    - topic message type: pi3hat_moteus_int_msgs/msg/OmniMulinexCommand 
+    - To test this controller, ```ros2 topic pub /omni_control/command pi3hat_moteus_int_msgs/msg/OmniMulinexCommand "{v_x: 0.0, v_y: 10.0, omega: 10.0}"```
+    Or, alternatively, run ``` ros2 run mulinex_ignition_py move_wheels ```
+- "pd_control" that moves the leg joints using a PD controller.
+    - topic from which it reads: /pd_controller/command
+    - topic message type:JointState (from Sensor_msgs.msg)
+    - To test this controller, run ``` ros2 run mulinex_ignition_py getup ```
+
+## USEFUL COMMANDS
+- ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
