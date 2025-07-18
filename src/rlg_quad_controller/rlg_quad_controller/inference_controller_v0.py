@@ -28,9 +28,17 @@ class InferenceController(Node):
 
         # Model path as pth file
         self.declare_parameter('model_path', '')
-        self.declare_parameter('config_path', '')
-        self.model_path     = self.get_parameter('model_path').get_parameter_value().string_value
-        self.config_path    = self.get_parameter('config_path').get_parameter_value().string_value
+        self.declare_parameter('env_path', '')
+        self.declare_parameter('agent_path', '')
+        self.model_path  = self.get_parameter('model_path').get_parameter_value().string_value
+        self.env_path    = self.get_parameter('env_path').get_parameter_value().string_value
+        self.agent_path  = self.get_parameter('agent_path').get_parameter_value().string_value
+
+        # Load env e agent yaml
+        with open(self.env_path, 'r') as f:
+            env_params = yaml.safe_load(f)
+        with open(self.agent_path, 'r') as f:
+            agent_params = yaml.safe_load(f)
 
         # Topic names
         self.declare_parameter('joint_state_topic', '/state_broadcaster/joint_states')
@@ -40,43 +48,33 @@ class InferenceController(Node):
         self.joint_target_pos_topic     = self.get_parameter('joint_target_pos_topic').get_parameter_value().string_value
         self.cmd_vel_topic              = self.get_parameter('cmd_vel_topic').get_parameter_value().string_value
 
-        # Inference rate
-        with open(self.config_path, 'r') as f:
-            params = yaml.safe_load(f)
-        
-        # self.declare_parameter('rate', 100)
-        # self.rate = self.get_parameter('rate').get_parameter_value().integer_value
-        self.rate = 1.0 / (params['task']['sim']['dt'] * params['task']['env']['control']['controlLeg']['decimation'])
+        self.rate = 1.0 / (env_params['sim']['dt'] * env_params['decimation'])
         rclpy.logging.get_logger('rclpy.node').info('Inference rate: {}'.format(self.rate))
 
-        leg_action_scale     = params['task']['env']['control']['controlLeg']['actionScale']    # 0.1  
-        wheel_action_scale   = params['task']['env']['control']['controlWheel']['actionScale']    # 50  
-        self.action_scale    = np.array([leg_action_scale]*8 + [wheel_action_scale]*4).reshape((12,1))
-        self.dofPositionScale   = params['task']['env']['learn']['dofPositionScale'] # 1.0
-        self.dofVelocityScale   = params['task']['env']['learn']['dofVelocityScale'] # 0.05
+        leg_action_scale        = env_params['actions']['joint_pos']['scale']    # 0.1  
+        wheel_action_scale      = env_params['actions']['joint_vel']['scale']    # 50  
+        self.action_scale       = np.array([leg_action_scale]*8 + [wheel_action_scale]*4).reshape((12,1))
+        self.dofPositionScale   = env_params['scene']['robot']['soft_joint_pos_limit_factor'] # 0.95
 
-        self.linearVelocityScale    = params['task']['env']['learn']['linearVelocityScale'] # 2.0
-        self.angularVelocityScale   = params['task']['env']['learn']['angularVelocityScale'] #0.25
-        self.cmd_vel_scale  = np.array([self.linearVelocityScale, self.linearVelocityScale, self.angularVelocityScale]).reshape((3,1))
         self.cmd_vel_min    = np.array([-1.0, -1.0]).reshape((2,1))
-        self.cmd_vel_max    = np.array([1.0, 1.0]).reshape((2,1))
+        self.cmd_vel_max    = np.array([ 1.0,  1.0]).reshape((2,1))
         
         self.hip_angle = 120.0
         self.knee_angle = 60.0
 
         self.default_dof    = np.array([
-                np.deg2rad(self.hip_angle),     
+                 np.deg2rad(self.hip_angle),     
                 -(np.deg2rad(self.hip_angle)),    
                 -(np.deg2rad(self.hip_angle)),
-                np.deg2rad(self.hip_angle),
+                 np.deg2rad(self.hip_angle),
                 -np.deg2rad(self.knee_angle),   
-                np.deg2rad(self.knee_angle),    
-                np.deg2rad(self.knee_angle),
+                 np.deg2rad(self.knee_angle),    
+                 np.deg2rad(self.knee_angle),
                 -np.deg2rad(self.knee_angle),
-                0.0,
-                0.0,
-                0.0,
-                0.0
+                 0.0,
+                 0.0,
+                 0.0,
+                 0.0
         ])
 
         self._avg_default_dof  = self.default_dof.tolist()
@@ -162,7 +160,7 @@ class InferenceController(Node):
 
         # Load PyTorch model and create timer
         rclpy.logging.get_logger('rclpy.node').info('Loading model from {}'.format(self.model_path))
-        self.model = build_rlg_model(self.model_path, params)
+        self.model = build_rlg_model(self.model_path, env_params, agent_params)
         self.startup_time = rclpy.clock.Clock().now()
         # start inference
         self.timer = self.create_timer(1.0 / self.rate, self.inference_callback)
@@ -234,11 +232,10 @@ class InferenceController(Node):
         # |     4     | joint_vel                       |   (12,)   |
         # |     5     | actions                         |   (12,)   |
         # +-----------+---------------------------------+-----------+
-
         obs_list = np.concatenate((
             self.base_ang_vel * self.angularVelocityScale,
             self.projected_gravity,
-            (self.cmd_vel * self.cmd_vel_scale).reshape((3,1)), 
+            (self.cmd_vel).reshape((3,1)), 
             np.fromiter(self.joint_pos.values(),dtype=float).reshape((self.njoint,1)) *
                 self.dofPositionScale,
             np.fromiter(self.joint_vel.values(),dtype=float).reshape((self.njoint,1)) *
