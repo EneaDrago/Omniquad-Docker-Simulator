@@ -23,6 +23,7 @@ setup(
             'getup = mulinex_ignition_py.getup:main',
             'gostraighton = mulinex_ignition_py.gostraighton:main',    
             'walking = mulinex_ignition_py.walking:main',          
+            'move_wheels = mulinex_ignition_py.move_wheels:main',
         ],
     },
 )
