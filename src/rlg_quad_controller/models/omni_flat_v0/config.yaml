@@ -81,10 +81,10 @@ task:
       LH_KFE: 1.2
       RF_KFE: 1.2
       RH_KFE: -1.2
-      LF_ANKLE: 0.0
-      LH_ANKLE: 0.0
-      RF_ANKLE: 0.0
-      RH_ANKLE: 0.0
+      LF_WHEEL_JNT: 0.0
+      LH_WHEEL_JNT: 0.0
+      RF_WHEEL_JNT: 0.0
+      RH_WHEEL_JNT: 0.0
     learn:
       linearVelocityXYRewardScale: 3.0
       linearVelocityZRewardScale: -5.0

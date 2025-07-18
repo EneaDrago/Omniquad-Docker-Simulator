@@ -14,6 +14,9 @@
         "/home/ros/docker_simulation_ws/build/mulinex_ignition_py",
         "/home/simone/docker_simulator/install/mulinex_ignition_py/lib/python3.10/site-packages",
         "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "./build/pi3hat_moteus_int_msgs/rosidl_generator_py"
+    ]
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
     "files.associations": {
