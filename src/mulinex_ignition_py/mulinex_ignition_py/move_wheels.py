@@ -12,9 +12,9 @@ class OmniVelCommander(Node):
         super().__init__('omni_vel_commander')
 
         # Declare parameters with default values
-        self.declare_parameter('vx', 0.0)
-        self.declare_parameter('vy', 0.0)
-        self.declare_parameter('w', 0.5)
+        self.declare_parameter('vx', 0.5)
+        self.declare_parameter('vy', -0.0)
+        self.declare_parameter('w', -0.5)
         self.declare_parameter('publish_rate', 10)
 
         # Get parameter values
@@ -56,7 +56,7 @@ class OmniVelCommander(Node):
 
         # Timer and time tracking
         self.start_time = self.get_clock().now()
-        self.timeout_duration = Duration(seconds=15.0)
+        self.timeout_duration = Duration(seconds=10.0)
 
         self.timer = self.create_timer(1.0 / self.rate_hz, self.publish_cmd)
 
