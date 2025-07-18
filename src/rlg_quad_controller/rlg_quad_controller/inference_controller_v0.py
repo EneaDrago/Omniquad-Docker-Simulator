@@ -9,7 +9,7 @@ from geometry_msgs.msg import Twist
 import transforms3d as t3d
 
 from .utils.torch_utils import quat_rotate_inverse, quat_rotate_inverse_numpy
-from .utils.rlg_utils import build_rlg_model, run_inference
+from .utils.rlg_utils_v0 import build_rlg_model, run_inference
 
 """
 This node subscribes to the joint states and cmd_vel topics, and publishes the target joint positions.
