@@ -13,6 +13,9 @@ def build_rlg_model(weights_path: str,
                     agent_cfg_path: str,
                     device: str = "cuda:0") -> torch.nn.Module:
 
+    import numpy.core.multiarray
+    from torch.serialization import add_safe_globals
+
     with open(agent_cfg_path) as f:
         agent_yaml = yaml.load(f, Loader=yaml.Loader)
     with open(env_cfg_path) as f:
@@ -22,8 +25,8 @@ def build_rlg_model(weights_path: str,
     params["config"]["env_config"] = env_yaml
 
     # estraggo dimensioni osservazione/azione dall'env_yaml
-    obs_dim = 41    # esempio: sostituisci con la chiave corretta
-    act_dim = 12
+    obs_dim = env_yaml['sim']['num_obs']    # assicurati che queste chiavi esistano
+    act_dim = env_yaml['sim']['num_actions']
 
     if 'rlgpu' not in env_configurations.configurations:
         dummy_env = SimpleNamespace()
@@ -40,10 +43,14 @@ def build_rlg_model(weights_path: str,
     runner = Runner()
     runner.load_config(params=params)
     player = runner.create_player()
+
+    add_safe_globals([numpy.core.multiarray.scalar])
+
     player.restore(weights_path)
 
     model = player.model.to(device).eval()
     return model
+
 
 
 def run_inference(model, observation, det=True):
