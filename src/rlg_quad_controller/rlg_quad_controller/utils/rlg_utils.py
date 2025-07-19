@@ -14,47 +14,57 @@ def build_rlg_model(weights_path: str,
                     agent_cfg_path: str,
                     device: str = "cuda:0") -> torch.nn.Module:
 
-    import numpy.core.multiarray
-    from torch.serialization import add_safe_globals
     import torch
+    import numpy.core.multiarray
+    from torch.serialization import safe_load, add_safe_globals
     from rl_games.algos_torch import torch_ext
+    import builtins
 
-    # safe patch per permettere scalar
+    # --- patch temporanea torch.load con safe globals ---
     add_safe_globals([numpy.core.multiarray.scalar])
+    original_torch_load = torch.load
 
-    with open(agent_cfg_path) as f:
-        agent_yaml = yaml.load(f, Loader=yaml.Loader)
-    with open(env_cfg_path) as f:
-        env_yaml   = yaml.load(f, Loader=yaml.Loader)
+    def patched_torch_load(f, *args, **kwargs):
+        kwargs['weights_only'] = False
+        return original_torch_load(f, *args, **kwargs)
 
-    params = copy.deepcopy(agent_yaml["params"])
-    params["config"]["env_config"] = env_yaml
+    torch.load = patched_torch_load
 
-    # fissi temporanei, o leggi da env_yaml se vuoi
-    obs_dim = 41
-    act_dim = 12
+    try:
+        with open(agent_cfg_path) as f:
+            agent_yaml = yaml.load(f, Loader=yaml.Loader)
+        with open(env_cfg_path) as f:
+            env_yaml = yaml.load(f, Loader=yaml.Loader)
 
-    if 'rlgpu' not in env_configurations.configurations:
-        dummy_env = SimpleNamespace()
-        dummy_env.observation_space = Box(
-            low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
-        )
-        dummy_env.action_space = Box(
-            low=-1.0, high=1.0, shape=(act_dim,), dtype=np.float32
-        )
-        env_configurations.configurations['rlgpu'] = {
-            'env_creator': lambda **kwargs: dummy_env
-        }
+        params = copy.deepcopy(agent_yaml["params"])
+        params["config"]["env_config"] = env_yaml
 
-    runner = Runner()
-    runner.load_config(params=params)
-    player = runner.create_player()
+        obs_dim = 41
+        act_dim = 12
 
-    # ora funziona: `torch.load` sarà sicuro internamente
-    player.restore(weights_path)
+        if 'rlgpu' not in env_configurations.configurations:
+            dummy_env = SimpleNamespace()
+            dummy_env.observation_space = Box(
+                low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
+            )
+            dummy_env.action_space = Box(
+                low=-1.0, high=1.0, shape=(act_dim,), dtype=np.float32
+            )
+            env_configurations.configurations['rlgpu'] = {
+                'env_creator': lambda **kwargs: dummy_env
+            }
 
-    model = player.model.to(device).eval()
-    return model
+        runner = Runner()
+        runner.load_config(params=params)
+        player = runner.create_player()
+
+        player.restore(weights_path)
+
+        model = player.model.to(device).eval()
+        return model
+    finally:
+        # Restore torch.load after model is loaded
+        torch.load = original_torch_load
 
 
 
