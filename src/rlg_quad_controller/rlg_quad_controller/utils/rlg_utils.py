@@ -1,11 +1,15 @@
 import yaml
-import torch
 import numpy as np
 from rl_games.torch_runner import Runner
 import copy
 from rl_games.common import env_configurations
 from types import SimpleNamespace
 from gym.spaces import Box
+
+import torch
+import numpy.core.multiarray
+from torch.serialization import add_safe_globals
+from rl_games.algos_torch.torch_ext import safe_load
 
 
 
@@ -14,11 +18,6 @@ def build_rlg_model(weights_path: str,
                     agent_cfg_path: str,
                     device: str = "cuda:0") -> torch.nn.Module:
 
-    import torch
-    import numpy.core.multiarray
-    from torch.serialization import safe_load, add_safe_globals
-    from rl_games.algos_torch import torch_ext
-    import builtins
 
     # --- patch temporanea torch.load con safe globals ---
     add_safe_globals([numpy.core.multiarray.scalar])
