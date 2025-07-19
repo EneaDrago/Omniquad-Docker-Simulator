@@ -25,8 +25,8 @@ def build_rlg_model(weights_path: str,
     params["config"]["env_config"] = env_yaml
 
     # estraggo dimensioni osservazione/azione dall'env_yaml
-    obs_dim = env_yaml['sim']['num_obs']    # assicurati che queste chiavi esistano
-    act_dim = env_yaml['sim']['num_actions']
+    obs_dim = 41   
+    act_dim = 12
 
     if 'rlgpu' not in env_configurations.configurations:
         dummy_env = SimpleNamespace()
