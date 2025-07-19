@@ -1,11 +1,9 @@
 import yaml
 import torch
 import numpy as np
-from rl_games.torch_runner import Runner
+from rl_games.common.player_factory import PlayerFactory
 import copy
 
-
-# TODO: device should be a parameter
 
 
 def build_rlg_model(weights_path: str,
@@ -13,24 +11,28 @@ def build_rlg_model(weights_path: str,
                        agent_cfg_path: str,
                        device: str = "cuda:0") -> torch.nn.Module:
     """
-    Carica un checkpoint rl‑games e restituisce il modello PyTorch.
-    Compatibile con rl‑games <= 1.6 (niente cfg_helper).
+    Carica un checkpoint rl‑games anche con la vecchia 1.6 (PlayerFactory).
     """
+    # 1. carica YAML con Loader completo (serve per !!python/tuple)
     with open(agent_cfg_path, "r") as f:
         agent_cfg = yaml.load(f, Loader=yaml.Loader)
     with open(env_cfg_path, "r") as f:
         env_cfg = yaml.load(f, Loader=yaml.Loader)
 
-    # merge “a mano”: agent_cfg ha già la chiave top‑level 'params'
+    # 2. merge manuale
     merged_cfg = copy.deepcopy(agent_cfg)
-    merged_cfg["params"]["env_config"] = env_cfg      # ciò che rl‑games si aspetta
+    merged_cfg["params"]["env_config"] = env_cfg
+    params = merged_cfg["params"]
 
-    runner = Runner(merged_cfg)       # firma valida fino alla 1.6 inclusa
-    player = runner.create_player()   # genera la rete
-    player.restore(weights_path)      # carica pesi + normalizzatori
+    # 3. costruisci il player tramite factory
+    algo_name = params["algo"]["name"]          # ← es. 'a2c_continuous'
+    player = PlayerFactory().create(algo_name, params=params)
+    player.restore(weights_path)                # carica pesi + normalizer
 
     model = player.model.to(device).eval()
     return model
+
+
 
 def run_inference(model, observation, det=True):
     """
