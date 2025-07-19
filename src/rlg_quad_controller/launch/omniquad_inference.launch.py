@@ -9,7 +9,7 @@ def generate_launch_description():
     params    = os.path.join(pkg_share, 'config', 'mulinex_config.yaml')
     env_path  = os.path.join(pkg_share, 'models', 'omni_flat_v1', 'env.yaml')
     agent_path= os.path.join(pkg_share, 'models', 'omni_flat_v1', 'agent.yaml')
-    weights   = os.path.join(pkg_share, 'models', 'omni_flat_v1', 'omniquad_flat.pth')
+    model_path   = os.path.join(pkg_share, 'models', 'omni_flat_v1', 'omniquad_flat.pth')
 
     node = Node(
         package    = 'rlg_quad_controller',
@@ -19,7 +19,7 @@ def generate_launch_description():
             params,
             {'env_cfg_path':    env_path},
             {'agent_cfg_path':  agent_path},
-            {'model_path':      weights},
+            {'model_path':      model_path},
             # se vuoi, puoi aggiungere override per gli scale:
             # {'angular_velocity_scale': 1.0},
             # {'cmd_vel_scale':         1.0},
