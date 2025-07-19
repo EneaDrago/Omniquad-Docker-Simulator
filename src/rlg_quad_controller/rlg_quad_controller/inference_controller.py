@@ -30,7 +30,7 @@ class InferenceController(Node):
         self.declare_parameter('simulation', False)
         self.declare_parameter('joint_state_topic', '/joint_states')
         self.declare_parameter('joint_target_topic', '/target_joint_states')
-        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
+        self.declare_parameter('cmd_vel_topic', '/teleop_twist_keyboard')
         # nuovi parametri per scaling
         self.declare_parameter('angular_velocity_scale', 1.0)
         self.declare_parameter('cmd_vel_scale', 1.0)
@@ -62,12 +62,6 @@ class InferenceController(Node):
         leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
         wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
         self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
-
-        # --- Scaling osservazioni posizione/velocità giunti ---
-        self.dof_position_scale = float(
-            self.agent_cfg['params']['env']['clip_actions']
-        )
-        self.dof_velocity_scale = self.env_cfg['learn'].get('dofVelocityScale', 0.05)
 
         # --- Caricamento modello RL‑Games ---
         self.get_logger().info(f"Loading rl‑games checkpoint: {self.model_path}")
@@ -178,8 +172,8 @@ class InferenceController(Node):
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
             self.cmd_vel * self.cmd_vel_scale,
-            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints,1)) * self.dof_position_scale,
-            np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints,1)) * self.dof_velocity_scale,
+            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints,1)), 
+            np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints,1)), 
             self.prev_action
         ]).reshape((1,-1))
 
