@@ -2,7 +2,7 @@ import yaml
 import torch
 import numpy as np
 from rl_games.torch_runner import Runner
-
+import copy
 
 
 # TODO: device should be a parameter
@@ -17,9 +17,9 @@ def build_rlg_model(weights_path: str,
     Compatibile con rl‑games <= 1.6 (niente cfg_helper).
     """
     with open(agent_cfg_path, "r") as f:
-        agent_cfg = yaml.safe_load(f)
+        agent_cfg = yaml.load(f, Loader=yaml.Loader)
     with open(env_cfg_path, "r") as f:
-        env_cfg = yaml.safe_load(f)
+        env_cfg = yaml.load(f, Loader=yaml.Loader)
 
     # merge “a mano”: agent_cfg ha già la chiave top‑level 'params'
     merged_cfg = copy.deepcopy(agent_cfg)

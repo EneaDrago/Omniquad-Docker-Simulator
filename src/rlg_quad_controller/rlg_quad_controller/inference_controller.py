@@ -38,9 +38,9 @@ class InferenceController(Node):
         # leggo gli YAML UNA sola volta, ci serviranno più avanti
         # ------------------------------------------------------------------
         with open(self.env_cfg_path, "r") as f:
-            self.env_cfg = yaml.safe_load(f)
+            self.env_cfg = yaml.load(f, Loader=yaml.Loader)
         with open(self.agent_cfg_path, "r") as f:
-            self.agent_cfg = yaml.safe_load(f)
+            self.agent_cfg = yaml.load(f, Loader=yaml.Loader)
 
         # ------------------------------------------------------------------
         # frequenza inferenza  = 1 / (dt * decimation)
@@ -74,7 +74,7 @@ class InferenceController(Node):
 
 
         with open(self.config_path, 'r') as f:
-            params = yaml.safe_load(f)
+            params = yaml.load(f, Loader=yaml.Loader)
 
         self.linearVelocityScale    = params['task']['env']['learn']['linearVelocityScale'] # 2.0
         self.angularVelocityScale   = params['task']['env']['learn']['angularVelocityScale'] #0.25
