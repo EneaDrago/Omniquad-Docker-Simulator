@@ -25,8 +25,8 @@ class InferenceController(Node):
 
         # --- Dichiarazione parametri ROS ---
         self.declare_parameter('model_path', '')
-        self.declare_parameter('env_path', '')
-        self.declare_parameter('agent_path', '')
+        self.declare_parameter('env_cfg_path', '')
+        self.declare_parameter('agent_cfg_path', '')
         self.declare_parameter('simulation', False)
         self.declare_parameter('joint_state_topic', '/joint_states')
         self.declare_parameter('joint_target_topic', '/target_joint_states')
