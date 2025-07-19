@@ -208,9 +208,9 @@ class InferenceController(Node):
         self.joint_pub.publish(msg)
 
 
-    def main(args=None):
-        rclpy.init(args=args)
-        node = InferenceController()
-        rclpy.spin(node)
-        node.destroy_node()
-        rclpy.shutdown()
+def main(args=None):
+    rclpy.init(args=args)
+    node = InferenceController()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
