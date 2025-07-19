@@ -18,42 +18,63 @@ cmd_vel  ---> | inference_controller | ---> joint_target_pos --> PD contr
 
 """
 
+# …
+
 class InferenceController(Node):
     def __init__(self):
-        super().__init__('inference_controller')
+        super().__init__("inference_controller")
 
-        # Simulation flag
-        self.declare_parameter('simulation', False)
-        self.simulation = self.get_parameter('simulation').get_parameter_value().bool_value
+        # ------------------------------------------------------------------
+        # nuovi parametri ROS: path agent + env
+        # ------------------------------------------------------------------
+        self.declare_parameter("model_path", "")
+        self.declare_parameter("env_cfg_path", "")
+        self.declare_parameter("agent_cfg_path", "")
+        self.model_path     = self.get_parameter("model_path").get_parameter_value().string_value
+        self.env_cfg_path   = self.get_parameter("env_cfg_path").get_parameter_value().string_value
+        self.agent_cfg_path = self.get_parameter("agent_cfg_path").get_parameter_value().string_value
 
-        # Model path as pth file
-        self.declare_parameter('model_path', '')
-        self.declare_parameter('config_path', '')
-        self.model_path     = self.get_parameter('model_path').get_parameter_value().string_value
-        self.config_path    = self.get_parameter('config_path').get_parameter_value().string_value
+        # ------------------------------------------------------------------
+        # leggo gli YAML UNA sola volta, ci serviranno più avanti
+        # ------------------------------------------------------------------
+        with open(self.env_cfg_path, "r") as f:
+            self.env_cfg = yaml.safe_load(f)
+        with open(self.agent_cfg_path, "r") as f:
+            self.agent_cfg = yaml.safe_load(f)
 
-        # Topic names
-        self.declare_parameter('joint_state_topic', '/state_broadcaster/joint_states')
-        self.declare_parameter('joint_target_pos_topic', '/joint_controller/command')
-        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
-        self.joint_state_topic          = self.get_parameter('joint_state_topic').get_parameter_value().string_value
-        self.joint_target_pos_topic     = self.get_parameter('joint_target_pos_topic').get_parameter_value().string_value
-        self.cmd_vel_topic              = self.get_parameter('cmd_vel_topic').get_parameter_value().string_value
+        # ------------------------------------------------------------------
+        # frequenza inferenza  = 1 / (dt * decimation)
+        # ------------------------------------------------------------------
+        dt          = self.env_cfg["sim"]["dt"]
+        decimation  = self.env_cfg["decimation"]
+        self.rate   = 1.0 / (dt * decimation)
+        self.get_logger().info(f"Inference rate: {self.rate:.2f} Hz")
 
-        # Inference rate
+        # ------------------------------------------------------------------
+        # scale azioni / osservazioni (campi mutati nel nuovo env.yaml)
+        # ------------------------------------------------------------------
+        leg_scale   = self.env_cfg["actions"]["joint_pos"]["scale"]     # 0.1
+        wheel_scale = self.env_cfg["actions"]["joint_vel"]["scale"]     # 50
+        self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
+
+        learn_cfg   = self.env_cfg["observations"]                      # corrisponde alle vecchie metriche
+        self.dofPositionScale   = self.agent_cfg["params"]["env"]["clip_actions"]     # esempio
+        self.dofVelocityScale   = 0.05                                  # se non c’è lo fissi
+
+        # ------------------------------------------------------------------
+        # carico il modello
+        # ------------------------------------------------------------------
+        self.get_logger().info(f"Loading rl‑games checkpoint '{self.model_path}'…")
+        self.model = build_rlg_model(
+            self.model_path,
+            self.env_cfg_path,
+            self.agent_cfg_path,
+            device="cuda:0"
+        )
+
+
         with open(self.config_path, 'r') as f:
             params = yaml.safe_load(f)
-        
-        # self.declare_parameter('rate', 100)
-        # self.rate = self.get_parameter('rate').get_parameter_value().integer_value
-        self.rate = 1.0 / (params['task']['sim']['dt'] * params['task']['env']['control']['controlLeg']['decimation'])
-        rclpy.logging.get_logger('rclpy.node').info('Inference rate: {}'.format(self.rate))
-
-        leg_action_scale     = params['task']['env']['control']['controlLeg']['actionScale']    # 0.1  
-        wheel_action_scale   = params['task']['env']['control']['controlWheel']['actionScale']    # 50  
-        self.action_scale    = np.array([leg_action_scale]*8 + [wheel_action_scale]*4).reshape((12,1))
-        self.dofPositionScale   = params['task']['env']['learn']['dofPositionScale'] # 1.0
-        self.dofVelocityScale   = params['task']['env']['learn']['dofVelocityScale'] # 0.05
 
         self.linearVelocityScale    = params['task']['env']['learn']['linearVelocityScale'] # 2.0
         self.angularVelocityScale   = params['task']['env']['learn']['angularVelocityScale'] #0.25

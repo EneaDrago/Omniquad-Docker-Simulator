@@ -1,40 +1,59 @@
 import yaml
 import torch
 import numpy as np
-from rl_games.algos_torch.network_builder import A2CBuilder
-from rl_games.algos_torch.models import ModelA2CContinuousLogStd
+from rl_games.torch_runner import Runner
+from rl_games.common import cfg_helper     # utility per unire/validare i dizionari
+
 
 
 # TODO: device should be a parameter
 
-def build_rlg_model(weights_path, params):
 
-    weights = torch.load(weights_path, map_location=torch.device('cuda:0'),weights_only=False)
+def build_rlg_model(
+        weights_path: str,
+        env_cfg_path: str,
+        agent_cfg_path: str,
+        device: str = "cuda:0"
+) -> torch.nn.Module:
+    """
+    Carica un checkpoint rl‑games (nuovo formato) e restituisce
+    il modello PyTorch pronto per l'inferenza.
 
-    net_params = params['train']['params']['network']
+    Args:
+        weights_path: percorso del file .pth salvato da rl‑games
+        env_cfg_path: path a env.yaml (il “task”/MDP)
+        agent_cfg_path: path a agent.yaml (algo/network/ppo ecc.)
+        device:      'cuda:0', 'cpu', ecc.
 
-    network = A2CBuilder()
-    network.load(net_params)
+    Returns:
+        model (torch.nn.Module) in modalità eval() sul device indicato
+    """
+    # 1. leggo i due YAML
+    with open(agent_cfg_path, "r") as f:
+        agent_cfg = yaml.safe_load(f)
+    with open(env_cfg_path, "r") as f:
+        env_cfg = yaml.safe_load(f)
 
-    model_a2c = ModelA2CContinuousLogStd(network)
+    # 2. rl‑games si aspetta un unico dict "params".
+    #    Il runner farà poi   cfg['params']['env_config']   per passarlo al costruttore dell'ambiente
+    #
+    #    Qualche helper:
+    #       - cfg_helper.ConfigMerger.merge ➜ preserva override / default
+    #       - ma per casi semplici basta aggiungere la chiave a mano.
+    #
+    merged_cfg = agent_cfg.copy()            # ← contiene già la chiave top‑level "params"
+    merged_cfg["params"]["env_config"] = env_cfg
 
-    build_config = {
-            'actions_num' : params['task']['env']['numActions'],
-            'input_shape' : (params['task']['env']['numObservations'],),
-            'num_seqs' : 1,
-            'value_size': 1,
-            'normalize_value' : params['train']['params']['config']['normalize_value'],
-            'normalize_input': params['train']['params']['config']['normalize_input']
-        }
-    model = model_a2c.build(build_config)
-    model.to('cuda:0')
+    # 3. Costruiamo un runner "fittizio" solo per generare il Player
+    runner = Runner(merged_cfg)
+    player = runner.create_player()
 
-    model.load_state_dict(weights['model'])
+    # 4. Carichiamo pesi e otteniamo il modello
+    player.restore(weights_path)             # carica anche running‑mean, scaler, ecc.
 
+    model = player.model.to(device)
     model.eval()
-
     return model
-
 
 def run_inference(model, observation, det=True):
     """
