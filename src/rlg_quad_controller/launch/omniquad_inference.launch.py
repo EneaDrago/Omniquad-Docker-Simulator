@@ -16,21 +16,21 @@ def generate_launch_description():
     env_path = os.path.join(
         get_package_share_directory('rlg_quad_controller'),
         'models',
-        'omni_flat_v0',
+        'omni_flat_v1',
         'env.yaml'
         )
     
     agent_path = os.path.join(
         get_package_share_directory('rlg_quad_controller'),
         'models',
-        'omni_flat_v0',
+        'omni_flat_v1',
         'agent.yaml'
         )
     
     weights_path = os.path.join(
         get_package_share_directory('rlg_quad_controller'),
         'models',
-        'omni_flat_v0',
+        'omni_flat_v1',
         'omniquad_flat.pth'
         )
     
