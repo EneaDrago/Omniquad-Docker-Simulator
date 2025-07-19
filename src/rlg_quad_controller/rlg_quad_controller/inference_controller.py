@@ -91,18 +91,15 @@ class InferenceController(Node):
         self.declare_parameter('use_imu', False)
         self.use_imu = self.get_parameter('use_imu').value
 
-        # init IMU vars
+        # init vars
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
+        self.cmd_vel = np.zeros((3,1))
 
         if self.use_imu:
             self.declare_parameter('imu_topic', '/IMU_Broadcaster/imu')
             imu_topic = self.get_parameter('imu_topic').value
             self.imu_sub = self.create_subscription(Imu, imu_topic, self.imu_callback, 10)
-        else:
-            # inizializzo a zero se non uso IMU
-            self.base_ang_vel = np.zeros((3,1))
-            self.projected_gravity = np.zeros((3,1))
 
         # --- Buffer di stato ---
         self.n_joints = 12
