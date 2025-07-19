@@ -4,6 +4,8 @@ import numpy as np
 from rl_games.torch_runner import Runner
 import copy
 from rl_games.common import env_configurations
+from types import SimpleNamespace
+from gym.spaces import Box
 
 
 
@@ -22,8 +24,12 @@ def build_rlg_model(weights_path: str,
 
     # REGISTRA 'rlgpu' dummy env se non esiste
     if 'rlgpu' not in env_configurations.configurations:
+        # Fake Gym-style env with observation_space and action_space
+        dummy_env = SimpleNamespace()
+        dummy_env.observation_space = Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
+        dummy_env.action_space = Box(low=-1.0, high=1.0, shape=(act_dim,), dtype=np.float32)
         env_configurations.configurations['rlgpu'] = {
-            'env_creator': lambda **kwargs: None
+            'env_creator': lambda **kwargs: dummy_env
         }
 
     runner = Runner()
