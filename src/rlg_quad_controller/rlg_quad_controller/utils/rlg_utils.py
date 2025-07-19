@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from rl_games.torch_runner import Runner
 import copy
+from rl_games.common import env_configurations
 
 
 
@@ -10,28 +11,26 @@ def build_rlg_model(weights_path: str,
                     env_cfg_path: str,
                     agent_cfg_path: str,
                     device: str = "cuda:0") -> torch.nn.Module:
-    """
-    Restituisce il modello PyTorch (eval) da un checkpoint rl‑games 1.6.x
-    """
-    # 1) leggi i due YAML con loader “completo” (serve per !!python/tuple)
+    
     with open(agent_cfg_path) as f:
         agent_yaml = yaml.load(f, Loader=yaml.Loader)
     with open(env_cfg_path) as f:
         env_yaml   = yaml.load(f, Loader=yaml.Loader)
 
-    # 2) mergia:   params['config']['env_config']  ← env_yaml
     params = copy.deepcopy(agent_yaml["params"])
     params["config"]["env_config"] = env_yaml
 
-    # 3) Runner → load_config → create_player
-    runner = Runner()                      # ctor senza argomenti
-    runner.load_config(params=params)      # inizializza algo_name, ecc.
-    player = runner.create_player()        # factory interna già registrata
+    # REGISTRA 'rlgpu' dummy env se non esiste
+    if 'rlgpu' not in env_configurations.configurations:
+        env_configurations.configurations['rlgpu'] = {
+            'env_creator': lambda **kwargs: None
+        }
 
-    # 4) carica i pesi + normalizzatori
+    runner = Runner()
+    runner.load_config(params=params)
+    player = runner.create_player()
     player.restore(weights_path)
 
-    # 5) prendi la rete e mettila sul device
     model = player.model.to(device).eval()
     return model
 
