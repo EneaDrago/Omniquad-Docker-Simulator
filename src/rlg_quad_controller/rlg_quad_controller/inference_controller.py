@@ -90,6 +90,12 @@ class InferenceController(Node):
 
         self.declare_parameter('use_imu', False)
         self.use_imu = self.get_parameter('use_imu').value
+
+        # init IMU vars
+        self.base_ang_vel = np.zeros(3)
+        self.base_lin_vel = np.zeros(3)
+        self.gravity_vec  = np.array([0.0, 0.0, -9.81])
+
         if self.use_imu:
             self.declare_parameter('imu_topic', '/IMU_Broadcaster/imu')
             imu_topic = self.get_parameter('imu_topic').value
