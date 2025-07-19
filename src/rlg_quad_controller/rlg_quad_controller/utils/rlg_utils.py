@@ -17,19 +17,20 @@ def build_rlg_model(weights_path: str,
     import numpy.core.multiarray
     from torch.serialization import add_safe_globals
     import torch
+    from rl_games.algos_torch import torch_ext
 
-    # autorizza tipi pickle-safe
+    # safe patch per permettere scalar
     add_safe_globals([numpy.core.multiarray.scalar])
 
     with open(agent_cfg_path) as f:
         agent_yaml = yaml.load(f, Loader=yaml.Loader)
     with open(env_cfg_path) as f:
-        env_yaml = yaml.load(f, Loader=yaml.Loader)
+        env_yaml   = yaml.load(f, Loader=yaml.Loader)
 
     params = copy.deepcopy(agent_yaml["params"])
     params["config"]["env_config"] = env_yaml
 
-    # imposta dimensioni oss/act (o rendi dinamico)
+    # fissi temporanei, o leggi da env_yaml se vuoi
     obs_dim = 41
     act_dim = 12
 
@@ -49,12 +50,12 @@ def build_rlg_model(weights_path: str,
     runner.load_config(params=params)
     player = runner.create_player()
 
-    # 🔥 caricamento manuale del checkpoint, bypassa il torch_ext interno
-    checkpoint = torch.load(weights_path, weights_only=False)
-    player.restore_from_checkpoint(checkpoint)
+    # ora funziona: `torch.load` sarà sicuro internamente
+    player.restore(weights_path)
 
     model = player.model.to(device).eval()
     return model
+
 
 
 
