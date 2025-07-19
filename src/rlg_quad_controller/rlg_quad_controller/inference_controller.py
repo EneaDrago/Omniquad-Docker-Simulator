@@ -36,7 +36,7 @@ class InferenceController(Node):
         self.declare_parameter('cmd_vel_scale', 1.0)
 
         # --- Lettura parametri ---
-        self.model_path       = self.get_parameter('model_cfg_path').value
+        self.model_path       = self.get_parameter('model_path').value
         self.env_cfg_path     = self.get_parameter('env_cfg_path').value
         self.agent_cfg_path   = self.get_parameter('agent_cfg_path').value
         self.simulation       = self.get_parameter('simulation').value

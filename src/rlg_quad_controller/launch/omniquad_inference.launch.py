@@ -19,7 +19,7 @@ def generate_launch_description():
             params,
             {'env_cfg_path':    env_path},
             {'agent_cfg_path':  agent_path},
-            {'model_cfg_path':  model_path},
+            {'model_path':      model_path},
             # se vuoi, puoi aggiungere override per gli scale:
             # {'angular_velocity_scale': 1.0},
             # {'cmd_vel_scale':         1.0},
