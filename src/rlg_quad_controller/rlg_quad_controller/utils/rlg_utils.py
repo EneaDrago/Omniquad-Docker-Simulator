@@ -2,57 +2,34 @@ import yaml
 import torch
 import numpy as np
 from rl_games.torch_runner import Runner
-from rl_games.common import cfg_helper     # utility per unire/validare i dizionari
 
 
 
 # TODO: device should be a parameter
 
 
-def build_rlg_model(
-        weights_path: str,
-        env_cfg_path: str,
-        agent_cfg_path: str,
-        device: str = "cuda:0"
-) -> torch.nn.Module:
+def build_rlg_model(weights_path: str,
+                       env_cfg_path: str,
+                       agent_cfg_path: str,
+                       device: str = "cuda:0") -> torch.nn.Module:
     """
-    Carica un checkpoint rl‑games (nuovo formato) e restituisce
-    il modello PyTorch pronto per l'inferenza.
-
-    Args:
-        weights_path: percorso del file .pth salvato da rl‑games
-        env_cfg_path: path a env.yaml (il “task”/MDP)
-        agent_cfg_path: path a agent.yaml (algo/network/ppo ecc.)
-        device:      'cuda:0', 'cpu', ecc.
-
-    Returns:
-        model (torch.nn.Module) in modalità eval() sul device indicato
+    Carica un checkpoint rl‑games e restituisce il modello PyTorch.
+    Compatibile con rl‑games <= 1.6 (niente cfg_helper).
     """
-    # 1. leggo i due YAML
     with open(agent_cfg_path, "r") as f:
         agent_cfg = yaml.safe_load(f)
     with open(env_cfg_path, "r") as f:
         env_cfg = yaml.safe_load(f)
 
-    # 2. rl‑games si aspetta un unico dict "params".
-    #    Il runner farà poi   cfg['params']['env_config']   per passarlo al costruttore dell'ambiente
-    #
-    #    Qualche helper:
-    #       - cfg_helper.ConfigMerger.merge ➜ preserva override / default
-    #       - ma per casi semplici basta aggiungere la chiave a mano.
-    #
-    merged_cfg = agent_cfg.copy()            # ← contiene già la chiave top‑level "params"
-    merged_cfg["params"]["env_config"] = env_cfg
+    # merge “a mano”: agent_cfg ha già la chiave top‑level 'params'
+    merged_cfg = copy.deepcopy(agent_cfg)
+    merged_cfg["params"]["env_config"] = env_cfg      # ciò che rl‑games si aspetta
 
-    # 3. Costruiamo un runner "fittizio" solo per generare il Player
-    runner = Runner(merged_cfg)
-    player = runner.create_player()
+    runner = Runner(merged_cfg)       # firma valida fino alla 1.6 inclusa
+    player = runner.create_player()   # genera la rete
+    player.restore(weights_path)      # carica pesi + normalizzatori
 
-    # 4. Carichiamo pesi e otteniamo il modello
-    player.restore(weights_path)             # carica anche running‑mean, scaler, ecc.
-
-    model = player.model.to(device)
-    model.eval()
+    model = player.model.to(device).eval()
     return model
 
 def run_inference(model, observation, det=True):
