@@ -1,34 +1,37 @@
 import yaml
 import torch
 import numpy as np
-from rl_games.common.player_factory import PlayerFactory
+from rl_games.torch_runner import Runner
 import copy
 
 
 
 def build_rlg_model(weights_path: str,
-                       env_cfg_path: str,
-                       agent_cfg_path: str,
-                       device: str = "cuda:0") -> torch.nn.Module:
+                    env_cfg_path: str,
+                    agent_cfg_path: str,
+                    device: str = "cuda:0") -> torch.nn.Module:
     """
-    Carica un checkpoint rl‑games anche con la vecchia 1.6 (PlayerFactory).
+    Restituisce il modello PyTorch (eval) da un checkpoint rl‑games 1.6.x
     """
-    # 1. carica YAML con Loader completo (serve per !!python/tuple)
-    with open(agent_cfg_path, "r") as f:
-        agent_cfg = yaml.load(f, Loader=yaml.Loader)
-    with open(env_cfg_path, "r") as f:
-        env_cfg = yaml.load(f, Loader=yaml.Loader)
+    # 1) leggi i due YAML con loader “completo” (serve per !!python/tuple)
+    with open(agent_cfg_path) as f:
+        agent_yaml = yaml.load(f, Loader=yaml.Loader)
+    with open(env_cfg_path) as f:
+        env_yaml   = yaml.load(f, Loader=yaml.Loader)
 
-    # 2. merge manuale
-    merged_cfg = copy.deepcopy(agent_cfg)
-    merged_cfg["params"]["env_config"] = env_cfg
-    params = merged_cfg["params"]
+    # 2) mergia:   params['config']['env_config']  ← env_yaml
+    params = copy.deepcopy(agent_yaml["params"])
+    params["config"]["env_config"] = env_yaml
 
-    # 3. costruisci il player tramite factory
-    algo_name = params["algo"]["name"]          # ← es. 'a2c_continuous'
-    player = PlayerFactory().create(algo_name, params=params)
-    player.restore(weights_path)                # carica pesi + normalizer
+    # 3) Runner → load_config → create_player
+    runner = Runner()                      # ctor senza argomenti
+    runner.load_config(params=params)      # inizializza algo_name, ecc.
+    player = runner.create_player()        # factory interna già registrata
 
+    # 4) carica i pesi + normalizzatori
+    player.restore(weights_path)
+
+    # 5) prendi la rete e mettila sul device
     model = player.model.to(device).eval()
     return model
 
