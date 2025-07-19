@@ -186,7 +186,7 @@ class InferenceController(Node):
 
         # warmup default pose
         delta = now - self.start_time
-        elapsed = delta.seconds + delta.nanoseconds * 1e-9
+        elapsed = delta.nanoseconds * 1e-9
         if elapsed < self._warmup_duration:
             target = self.default_pose
         else:
