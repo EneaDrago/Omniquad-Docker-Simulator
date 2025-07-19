@@ -46,6 +46,11 @@ class InferenceController(Node):
         self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
         self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
 
+        # init vars
+        self.base_ang_vel = np.zeros((3,1))
+        self.projected_gravity = np.zeros((3,1))
+        self.cmd_vel = np.zeros((3,1))
+
         # --- Caricamento YAML di configurazione ---
         with open(self.env_cfg_path, 'r') as f:
             self.env_cfg = yaml.load(f, Loader=yaml.Loader)
@@ -91,10 +96,7 @@ class InferenceController(Node):
         self.declare_parameter('use_imu', False)
         self.use_imu = self.get_parameter('use_imu').value
 
-        # init vars
-        self.base_ang_vel = np.zeros((3,1))
-        self.projected_gravity = np.zeros((3,1))
-        self.cmd_vel = np.zeros((3,1))
+
 
         if self.use_imu:
             self.declare_parameter('imu_topic', '/IMU_Broadcaster/imu')
