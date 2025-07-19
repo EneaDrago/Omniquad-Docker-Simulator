@@ -7,7 +7,6 @@ from rl_games.common import env_configurations
 from types import SimpleNamespace
 from gym.spaces import Box
 
-
 def build_rlg_model(weights_path: str,
                     env_cfg_path: str,
                     agent_cfg_path: str,
@@ -15,6 +14,9 @@ def build_rlg_model(weights_path: str,
 
     import numpy.core.multiarray
     from torch.serialization import add_safe_globals
+
+    # autorizza tipi pickle-safe per PyTorch >= 2.6
+    add_safe_globals([numpy.core.multiarray.scalar])
 
     with open(agent_cfg_path) as f:
         agent_yaml = yaml.load(f, Loader=yaml.Loader)
@@ -24,8 +26,8 @@ def build_rlg_model(weights_path: str,
     params = copy.deepcopy(agent_yaml["params"])
     params["config"]["env_config"] = env_yaml
 
-    # estraggo dimensioni osservazione/azione dall'env_yaml
-    obs_dim = 41   
+    # imposta dimensioni oss/act se non gestite dinamicamente
+    obs_dim = 41
     act_dim = 12
 
     if 'rlgpu' not in env_configurations.configurations:
@@ -43,9 +45,6 @@ def build_rlg_model(weights_path: str,
     runner = Runner()
     runner.load_config(params=params)
     player = runner.create_player()
-
-    add_safe_globals([numpy.core.multiarray.scalar])
-
     player.restore(weights_path)
 
     model = player.model.to(device).eval()
