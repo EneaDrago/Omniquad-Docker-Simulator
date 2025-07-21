@@ -5,44 +5,28 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    ld = LaunchDescription()
+    pkg_share = get_package_share_directory('rlg_quad_controller')
+    params    = os.path.join(pkg_share, 'config', 'mulinex_config.yaml')
+    env_path  = os.path.join(pkg_share, 'models', 'omni_flat_v1', 'env.yaml')
+    agent_path= os.path.join(pkg_share, 'models', 'omni_flat_v1', 'agent.yaml')
+    model_path   = os.path.join(pkg_share, 'models', 'omni_flat_v1', 'omniquad_flat.pth')
 
-    params = os.path.join(
-        get_package_share_directory('rlg_quad_controller'),
-        'config',
-        'mulinex_config.yaml'
-        )
-    
-    env_path = os.path.join(
-        get_package_share_directory('rlg_quad_controller'),
-        'models',
-        'omni_flat_v0',
-        'env.yaml'
-        )
-    
-    agent_path = os.path.join(
-        get_package_share_directory('rlg_quad_controller'),
-        'models',
-        'omni_flat_v0',
-        'agent.yaml'
-        )
-    
-    weights_path = os.path.join(
-        get_package_share_directory('rlg_quad_controller'),
-        'models',
-        'omni_flat_v0',
-        'omniquad_flat.pth'
-        )
-    
-    node=Node(
-        package = 'rlg_quad_controller',
-        name = 'inference_controller',
+    node = Node(
+        package    = 'rlg_quad_controller',
         executable = 'inference_controller',
-        parameters = [params,
-                      {'env_path': env_path},
-                      {'agent_path': agent_path},
-                      {'model_path': weights_path}]
+        name       = 'inference_controller',
+        parameters = [
+            params,
+            {'env_cfg_path':    env_path},
+            {'agent_cfg_path':  agent_path},
+            {'model_path':      model_path},
+            {'use_imu':         True},
+            {'imu_topic':       '/omnicar/imu'},
+            {'joint_state_topic':       '/joint_states'},
+            # se vuoi, puoi aggiungere override per gli scale:
+            # {'angular_velocity_scale': 1.0},
+            # {'cmd_vel_scale':         1.0},
+        ]
     )
 
-    ld.add_action(node)
-    return ld
+    return LaunchDescription([node])

@@ -1,227 +1,183 @@
 import rclpy
+from rclpy.node import Node
+
+import yaml
 import torch
 import numpy as np
-import yaml
-from rclpy.node import Node
-from pi3hat_moteus_int_msgs.msg import JointsCommand, JointsStates, PacketPass
-from sensor_msgs.msg import  Imu, JointState
-from geometry_msgs.msg import Twist 
 import transforms3d as t3d
 
-from .utils.torch_utils import quat_rotate_inverse, quat_rotate_inverse_numpy
+from sensor_msgs.msg import Imu, JointState
+from geometry_msgs.msg import Twist
+from pi3hat_moteus_int_msgs.msg import JointsCommand, JointsStates
+
+from .utils.torch_utils import quat_rotate_inverse_numpy
 from .utils.rlg_utils import build_rlg_model, run_inference
 
-"""
-This node subscribes to the joint states and cmd_vel topics, and publishes the target joint positions.
-
-cmd_vel  ---> | inference_controller | ---> joint_target_pos --> PD contr
-
-"""
 
 class InferenceController(Node):
+    """
+    ROS2 node per eseguire inference con una policy rl‑games
+    e pubblicare comandi articolari a rate fissa.
+    """
+
     def __init__(self):
         super().__init__('inference_controller')
 
-        # Simulation flag
-        self.declare_parameter('simulation', False)
-        self.simulation = self.get_parameter('simulation').get_parameter_value().bool_value
-
-        # Model path as pth file
+        # --- Dichiarazione parametri ROS ---
         self.declare_parameter('model_path', '')
-        self.declare_parameter('config_path', '')
-        self.model_path     = self.get_parameter('model_path').get_parameter_value().string_value
-        self.config_path    = self.get_parameter('config_path').get_parameter_value().string_value
+        self.declare_parameter('env_cfg_path', '')
+        self.declare_parameter('agent_cfg_path', '')
+        self.declare_parameter('simulation', False)
+        self.declare_parameter('joint_state_topic', '/joint_states')
+        self.declare_parameter('joint_target_topic', '/target_joint_states')
+        self.declare_parameter('cmd_vel_topic', '/teleop_twist_keyboard')
+        # nuovi parametri per scaling
+        self.declare_parameter('angular_velocity_scale', 1.0)
+        self.declare_parameter('cmd_vel_scale', 1.0)
 
-        # Topic names
-        self.declare_parameter('joint_state_topic', '/state_broadcaster/joint_states')
-        self.declare_parameter('joint_target_pos_topic', '/joint_controller/command')
-        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
-        self.joint_state_topic          = self.get_parameter('joint_state_topic').get_parameter_value().string_value
-        self.joint_target_pos_topic     = self.get_parameter('joint_target_pos_topic').get_parameter_value().string_value
-        self.cmd_vel_topic              = self.get_parameter('cmd_vel_topic').get_parameter_value().string_value
+        # --- Lettura parametri ---
+        self.model_path       = self.get_parameter('model_path').value
+        self.env_cfg_path     = self.get_parameter('env_cfg_path').value
+        self.agent_cfg_path   = self.get_parameter('agent_cfg_path').value
+        self.simulation       = self.get_parameter('simulation').value
+        self.joint_state_topic= self.get_parameter('joint_state_topic').value
+        self.joint_target_topic = self.get_parameter('joint_target_topic').value
+        self.cmd_vel_topic    = self.get_parameter('cmd_vel_topic').value
+        self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
+        self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
 
-        # Inference rate
-        with open(self.config_path, 'r') as f:
-            params = yaml.safe_load(f)
-        
-        # self.declare_parameter('rate', 100)
-        # self.rate = self.get_parameter('rate').get_parameter_value().integer_value
-        self.rate = 1.0 / (params['task']['sim']['dt'] * params['task']['env']['control']['controlLeg']['decimation'])
-        rclpy.logging.get_logger('rclpy.node').info('Inference rate: {}'.format(self.rate))
+        # init vars
+        self.base_ang_vel = np.zeros((3,1))
+        self.projected_gravity = np.zeros((3,1))
+        self.cmd_vel = np.zeros((3,1))
 
-        leg_action_scale     = params['task']['env']['control']['controlLeg']['actionScale']    # 0.1  
-        wheel_action_scale   = params['task']['env']['control']['controlWheel']['actionScale']    # 50  
-        self.action_scale    = np.array([leg_action_scale]*8 + [wheel_action_scale]*4).reshape((12,1))
-        self.dofPositionScale   = params['task']['env']['learn']['dofPositionScale'] # 1.0
-        self.dofVelocityScale   = params['task']['env']['learn']['dofVelocityScale'] # 0.05
+        # --- Caricamento YAML di configurazione ---
+        with open(self.env_cfg_path, 'r') as f:
+            self.env_cfg = yaml.load(f, Loader=yaml.Loader)
+        with open(self.agent_cfg_path, 'r') as f:
+            self.agent_cfg = yaml.load(f, Loader=yaml.Loader)
 
-        self.linearVelocityScale    = params['task']['env']['learn']['linearVelocityScale'] # 2.0
-        self.angularVelocityScale   = params['task']['env']['learn']['angularVelocityScale'] #0.25
-        self.cmd_vel_scale  = np.array([self.linearVelocityScale, self.linearVelocityScale, self.angularVelocityScale]).reshape((3,1))
-        self.cmd_vel_min    = np.array([-1.0, -1.0]).reshape((2,1))
-        self.cmd_vel_max    = np.array([1.0, 1.0]).reshape((2,1))
-        
-        self.hip_angle = 120.0
-        self.knee_angle = 60.0
+        # --- Calcolo rate di inference ---
+        dt = self.env_cfg['sim']['dt']
+        decimation = self.env_cfg['decimation']
+        self.rate_hz = 1.0 / (dt * decimation)
+        self.get_logger().info(f'Inference rate: {self.rate_hz:.2f} Hz')
 
-        self.default_dof    = np.array([
-                np.deg2rad(self.hip_angle),     
-                -(np.deg2rad(self.hip_angle)),    
-                -(np.deg2rad(self.hip_angle)),
-                np.deg2rad(self.hip_angle),
-                -np.deg2rad(self.knee_angle),   
-                np.deg2rad(self.knee_angle),    
-                np.deg2rad(self.knee_angle),
-                -np.deg2rad(self.knee_angle),
-                0.0,
-                0.0,
-                0.0,
-                0.0
-        ])
+        # --- Scaling azioni ---
+        leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
+        wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
+        self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 
-        self._avg_default_dof  = self.default_dof.tolist()
-        # Initialize joint publisher/subscriber
-        self.njoint = 12
+        # --- Caricamento modello RL‑Games ---
+        self.get_logger().info(f"Loading rl‑games checkpoint: {self.model_path}")
+        self.model = build_rlg_model(
+            weights_path   = self.model_path,
+            env_cfg_path   = self.env_cfg_path,
+            agent_cfg_path = self.agent_cfg_path,
+            device         = 'cuda:0'
+        )
+        self.get_logger().info('Model successfully loaded.')
 
-        self.joint_names=(
-            'LF_HFE',   
-            'LH_HFE',   
-            'RF_HFE',
-            'RH_HFE',
-            'LF_KFE',   
-            'LH_KFE',   
-            'RF_KFE',
-            'RH_KFE',
-            'LF_WHEEL_JNT',
-            'LH_WHEEL_JNT',
-            'RF_WHEEL_JNT',
-            'RH_WHEEL_JNT',
+        # --- Pubblicatori/Sottoscrittori ---
+        if self.simulation:
+            self.joint_pub = self.create_publisher(JointState, self.joint_target_topic, 10)
+            self.joint_sub = self.create_subscription(
+                JointState, self.joint_state_topic, self.joint_state_callback, 10
+            )
+        else:
+            self.joint_pub = self.create_publisher(JointsCommand, self.joint_target_topic, 10)
+            self.joint_sub = self.create_subscription(
+                JointsStates, self.joint_state_topic, self.joint_state_callback, 10
+            )
+        self.cmd_sub = self.create_subscription(
+            Twist, self.cmd_vel_topic, self.cmd_vel_callback, 10
         )
 
-        
-        self.joint_kp = np.array([
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0])
-        
-
-
-        self.joint_kd = np.array([
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0])
-
-            
-        if self.simulation:
-            self.joint_target_pos_pub = self.create_publisher(JointState, self.joint_target_pos_topic, 10)
-            self.joint_sub  = self.create_subscription(JointState, self.joint_state_topic, self.joint_state_callback, 10)
-        else:
-            self.joint_target_pos_pub = self.create_publisher(JointsCommand, self.joint_target_pos_topic, 10)
-            self.joint_sub  = self.create_subscription(JointsStates, self.joint_state_topic, self.joint_state_callback, 10)
-
-        self.cmd_sub    = self.create_subscription(Twist, self.cmd_vel_topic, self.cmd_vel_callback, 10)
-
         self.declare_parameter('use_imu', False)
-        self.declare_parameter('imu_topic', '/IMU_Broadcaster/imu')
-        self.use_imu = self.get_parameter('use_imu').get_parameter_value().bool_value
+        self.use_imu = self.get_parameter('use_imu').value
+
+
+
         if self.use_imu:
-            self.imu_topic = self.get_parameter('imu_topic').get_parameter_value().string_value
-            self.imu_sub = self.create_subscription(Imu, self.imu_topic, self.imu_callback, 10)
+            self.declare_parameter('imu_topic', '/omnicar/imu')
+            imu_topic = self.get_parameter('imu_topic').value
+            self.imu_sub = self.create_subscription(Imu, imu_topic, self.imu_callback, 10)
 
-        # Initialize buffers as dicts, so it's independent of the order of the joints
-        self.joint_pos = {self.joint_names[i]:0.0 for i in range(self.njoint)}
-        self.joint_vel = {self.joint_names[i]:0.0 for i in range(self.njoint)}
-        self.previous_joint_pos =self.joint_pos.copy()
-        self.prev_timestamp = 0.0
+        # --- Buffer di stato ---
+        self.n_joints_tot = 12
+        self.n_joints_pos = 8
+        self.joint_names_pos = [
+            'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
+            'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
+        ]
+        self.joint_names_vel = [
+            'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
+            'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
+            'LF_WHEEL_JNT','LH_WHEEL_JNT','RF_WHEEL_JNT','RH_WHEEL_JNT'
+        ]
+        self.joint_pos = {n:0.0 for n in self.joint_names_pos}
+        self.joint_vel = {n:0.0 for n in self.joint_names_vel}
+        self.prev_action = np.zeros((self.n_joints_tot,1))
 
-        self.previous_action = np.zeros((self.njoint,1))
-        
-        self.base_ang_vel = np.zeros((3,1))
-        self.cmd_vel = np.zeros((3,1)) # speed and heading
-        self.base_quat = np.zeros((4,1))
-        self.projected_gravity = np.zeros((3,1))
-        self.yawboia = 0.0
+        # --- Posa di default e warmup ---
+        hip  = np.deg2rad(120.0)
+        knee = np.deg2rad(60.0)
+        self.default_pose = np.array([
+            hip, -hip, -hip, hip,
+            -knee, knee, knee, -knee,
+            0,0,0,0
+        ])
+        self._warmup_duration = 3.0
+        self.start_time = self.get_clock().now()
 
-        # Load PyTorch model and create timer
-        rclpy.logging.get_logger('rclpy.node').info('Loading model from {}'.format(self.model_path))
-        self.model = build_rlg_model(self.model_path, params)
-        self.startup_time = rclpy.clock.Clock().now()
-        # start inference
-        self.timer = self.create_timer(1.0 / self.rate, self.inference_callback)
-        rclpy.logging.get_logger('rclpy.node').info('Model loaded. Node ready for inference.') 
+        # --- Timer di inference ---
+        self.timer = self.create_timer(1.0/self.rate_hz, self.inference_callback)
+        self.get_logger().info('Node initialized and ready.')
 
+    def cmd_vel_callback(self, msg: Twist):
+        self.cmd_vel = np.array([
+            msg.linear.x, msg.linear.y, msg.angular.z
+        ]).reshape((3,1))
 
-    def cmd_vel_callback(self, msg):
-        self.cmd_vel = np.array([msg.linear.x, msg.linear.y, msg.angular.z]).reshape((3,1))
-        np.clip(self.cmd_vel, self.cmd_vel_min, self.cmd_vel_max)
+    def imu_callback(self, msg: Imu):
+        """
+        Update base angular velocity and orientation from IMU.
+        Project gravity vector into robot frame.
+        """
+        self.base_ang_vel = np.array([
+            msg.angular_velocity.x,
+            msg.angular_velocity.y,
+            msg.angular_velocity.z
+        ]).reshape((3, 1))
 
+        quat = [
+            msg.orientation.w,
+            msg.orientation.x,
+            msg.orientation.y,
+            msg.orientation.z
+        ]
+        yaw, pitch, roll = t3d.euler.quat2euler(quat, axes='szyx')
+        corrected = t3d.euler.euler2quat(
+            self.yaw_bias, pitch, roll, axes='szyx'
+        )
+        self.base_quat = np.array(corrected).reshape((4, 1))
+        self.projected_gravity = quat_rotate_inverse_numpy(
+            self.base_quat, np.array([0, 0, -1]).reshape((3, 1))
+        )
 
-    def imu_callback(self, msg):
-        self.base_ang_vel = np.array([msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z]).reshape((3,1))
-        orientation_list = [msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z]
-        # rclpy.logging.get_logger('rclpy.node').info('QUAT: {}'.format(orientation_list))
-        yaw, pitch, roll = t3d.euler.quat2euler(orientation_list,axes='szyx')
-        # rclpy.logging.get_logger('rclpy.node').info('RPY: {}'.format([yaw,pitch,roll]))
-        (w,x,y,z) =  t3d.euler.euler2quat(self.yawboia, pitch, roll, axes='szyx')
-        # rclpy.logging.get_logger('rclpy.node').info('CORRECTED_QUAT: {}'.format((w,x,y,z)))
-        self.base_quat = np.array([w,x,y,z]).reshape((4,1))
-        # UNCOMMENT TO LOAD QUAT FROM IMU (USE WITH CAUTION, THERE IS DRIFT ON THE YAW)
-        # self.base_quat = np.array([msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z]).reshape((4,1))
-        self.projected_gravity = quat_rotate_inverse_numpy(self.base_quat, np.array([0,0,-1.0]).reshape((3,1)))
-
-
-    def joint_state_callback(self, msg):
-        # Assign to dict using the names in msg.name
-        t = rclpy.clock.Clock().now()
-        timestamp = t.nanoseconds / 1e9 # [s]
-        # rclpy.logging.get_logger('rclpy.node').info('{}'.format(timestamp - self.prev_timestamp))
-        for i in range(self.njoint):
-            if (not np.isnan(msg.position[i]) and (not np.isnan(msg.velocity[i]))):
-                self.joint_pos[msg.name[i]] = msg.position[i]
-                self.joint_vel[msg.name[i]] = msg.velocity[i]
-            # UNCOMMENT TO COMPUTE VEL BY DERIVATION 
-            # self.joint_vel[msg.name[i]] = (msg.position[i] - self.previous_joint_pos[msg.name[i]]) / (timestamp - self.prev_timestamp)
-            self.previous_joint_pos[msg.name[i]] = msg.position[i]
-        self.prev_timestamp = timestamp
-
-
-    def warmup_controller(self):
-        joint_msg = JointsCommand()
-        if self.simulation:
-            joint_msg = JointState()
-        joint_msg.header.stamp = rclpy.clock.Clock().now().to_msg()
-        joint_msg.name = self.joint_names
-        joint_msg.position = (self.default_dof).tolist()
-        if not self.simulation:
-            joint_msg.kp_scale = self.joint_kp.tolist()
-            joint_msg.kd_scale = self.joint_kd.tolist()
-        joint_msg.velocity = np.zeros(self.njoint).tolist()
-        joint_msg.effort = np.zeros(self.njoint).tolist()
-        self.joint_target_pos_pub.publish(joint_msg)
-
+    def joint_state_callback(self, msg: JointState):
+        """
+        Update current joint positions and velocities.
+        """
+        for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
+            if name in self.joint_pos:
+                self.joint_pos[name] = pos
+                self.joint_vel[name] = vel
 
     def inference_callback(self):
-        """
-        Callback function for inference timer. Infers joints target_pos from model and publishes it.
-        """
+        now = self.get_clock().now()
+        # costruisco l’osservazione
+
         # +---------------------------------------------------------+
         # | Active Observation Terms in Group: 'policy' (shape: (41,)) |
         # +-----------+---------------------------------+-----------+
@@ -235,50 +191,47 @@ class InferenceController(Node):
         # |     5     | actions                         |   (12,)   |
         # +-----------+---------------------------------+-----------+
 
-        obs_list = np.concatenate((
-            self.base_ang_vel * self.angularVelocityScale,
+        obs = np.vstack([
+            self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
-            (self.cmd_vel * self.cmd_vel_scale).reshape((3,1)), 
-            np.fromiter(self.joint_pos.values(),dtype=float).reshape((self.njoint,1)) *
-                self.dofPositionScale,
-            np.fromiter(self.joint_vel.values(),dtype=float).reshape((self.njoint,1)) *
-                self.dofVelocityScale,
-            self.previous_action, 
-        )).reshape((1,41))
-        # rclpy.logging.get_logger('rclpy.node').info('Observation vector: {}'.format(obs_list))
-        
-        # try:
-        action = run_inference(self.model, obs_list, det=True)
-        joint_msg = JointsCommand()
-        if self.simulation:
-            joint_msg = JointState()
-        joint_msg.header.stamp = rclpy.clock.Clock().now().to_msg()
-        joint_msg.name = self.joint_names
-        self.previous_action = np.reshape(action,(self.njoint,1))
-        action = np.squeeze(action)
+            self.cmd_vel * self.cmd_vel_scale,
+            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints_pos,1)), 
+            np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
+            self.prev_action # 12
+        ]).reshape((1,-1))
+        self.get_logger().info(f"Observation shape: {obs.shape}\n")
 
-        if rclpy.clock.Clock().now() < (self.startup_time + rclpy.duration.Duration(seconds=3.0)):
-            action *= 0.0
-            joint_msg.position = self._avg_default_dof
+        action = run_inference(self.model, obs, det=True).flatten()
+        self.prev_action = action.reshape((self.n_joints_tot,1))
+
+        # warmup default pose
+        delta = now - self.start_time
+        elapsed = delta.nanoseconds * 1e-9
+        if elapsed < self._warmup_duration:
+            target = self.default_pose
         else:
-            joint_msg.position = (np.squeeze(action) * self.action_scale + self.default_dof).tolist()
-            
-        if not self.simulation:
-            joint_msg.kp_scale = self.joint_kp.tolist()
-            joint_msg.kd_scale = self.joint_kd.tolist()
-        joint_msg.velocity = np.zeros(self.njoint).tolist()
-        joint_msg.effort = np.zeros(self.njoint).tolist()
-        self.joint_target_pos_pub.publish(joint_msg)
+            target = action * self.action_scale.flatten() + self.default_pose
 
+        # pubblicazione
+        if self.simulation:
+            msg = JointState()
+        else:
+            msg = JointsCommand()                               ########### DA CAMBIARE ###########
+            msg.kp_scale = [1.0]*self.n_joints_tot
+            msg.kd_scale = [1.0]*self.n_joints_tot
 
+        msg.header.stamp = now.to_msg()
+        msg.name = self.joint_names_vel
+        msg.position = target.tolist()
+        self.joint_pub.publish(msg)
+        self.get_logger().info(f"Published target: {target}\n")
+        self.get_logger().info(f"Action: {action}\n")
         
+
 
 def main(args=None):
     rclpy.init(args=args)
-    inference_controller = InferenceController()
-    rclpy.spin(inference_controller)
-    inference_controller.destroy_node()
+    node = InferenceController()
+    rclpy.spin(node)
+    node.destroy_node()
     rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()

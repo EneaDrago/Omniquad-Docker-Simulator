@@ -158,6 +158,7 @@ def generate_launch_description():
             additional_env=gz_env, # type: ignore
             shell=True,
         )
+    
     #define the bridge action
     bridge = Node(
         package="ros_gz_bridge",
@@ -167,10 +168,6 @@ def generate_launch_description():
             [robot_namespace,"gt_odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry"],
             "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
             [robot_namespace,"rgl_lidar@sensor_msgs/msg/PointCloud2@ignition.msgs.PointCloudPacked"],
-            # "/rgbd_camera/image@sensor_msgs/msg/Image@ignition.msgs.Image",
-            # "/rgbd_camera/camera_info@sensor_msgs/msg/CameraInfo@ignition.msgs.CameraInfo",
-            # "/rgbd_camera/depth_image@sensor_msgs/msg/Image@ignition.msgs.Image",
-            # "/rgbd_camera/points@sensor_msgs/msg/PointCloud2@ignition.msgs.PointCloudPacked"
         ],
         output="screen",
     )
@@ -234,17 +231,6 @@ def generate_launch_description():
          '--param-file',
             conf_file_path],
     )
-
-    # joy_launch = IncludeLaunchDescription(
-    #         PythonLaunchDescriptionSource([
-    #             PathJoinSubstitution([
-    #                 FindPackageShare('omni_mulinex_joystic'),
-    #                 'launch',
-    #                 'start_joy_sim.launch.py'
-    #             ])
-    #         ]),
-    #         condition=IfCondition(joystic_teleop)
-    #     )
     
     # add arguments
     ld.add_action(gz_verbosity_arg)

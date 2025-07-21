@@ -1,85 +1,93 @@
 import yaml
-import torch
 import numpy as np
-from rl_games.algos_torch.network_builder import A2CBuilder
-from rl_games.algos_torch.models import ModelA2CContinuousLogStd
+from rl_games.torch_runner import Runner
+import copy
+from rl_games.common import env_configurations
+from types import SimpleNamespace
+from gym.spaces import Box
+
+import torch
+import numpy.core.multiarray
+from torch.serialization import add_safe_globals
+from rl_games.algos_torch.torch_ext import safe_load
 
 
-# TODO: device should be a parameter
 
-def build_rlg_model(weights_path, params):
+def build_rlg_model(weights_path: str,
+                    env_cfg_path: str,
+                    agent_cfg_path: str,
+                    device: str = "cuda:0") -> torch.nn.Module:
 
-    weights = torch.load(weights_path, map_location=torch.device('cuda:0'),weights_only=False)
 
-    net_params = params['train']['params']['network']
+    # --- patch temporanea torch.load con safe globals ---
+    add_safe_globals([numpy.core.multiarray.scalar])
+    original_torch_load = torch.load
 
-    network = A2CBuilder()
-    network.load(net_params)
+    def patched_torch_load(f, *args, **kwargs):
+        kwargs['weights_only'] = False
+        return original_torch_load(f, *args, **kwargs)
 
-    model_a2c = ModelA2CContinuousLogStd(network)
+    torch.load = patched_torch_load
 
-    build_config = {
-            'actions_num' : params['task']['env']['numActions'],
-            'input_shape' : (params['task']['env']['numObservations'],),
-            'num_seqs' : 1,
-            'value_size': 1,
-            'normalize_value' : params['train']['params']['config']['normalize_value'],
-            'normalize_input': params['train']['params']['config']['normalize_input']
-        }
-    model = model_a2c.build(build_config)
-    model.to('cuda:0')
+    try:
+        with open(agent_cfg_path) as f:
+            agent_yaml = yaml.load(f, Loader=yaml.Loader)
+        with open(env_cfg_path) as f:
+            env_yaml = yaml.load(f, Loader=yaml.Loader)
 
-    model.load_state_dict(weights['model'])
+        params = copy.deepcopy(agent_yaml["params"])
+        params["config"]["env_config"] = env_yaml
 
-    model.eval()
+        obs_dim = 41
+        act_dim = 12
 
-    return model
+        if 'rlgpu' not in env_configurations.configurations:
+            dummy_env = SimpleNamespace()
+            dummy_env.observation_space = Box(
+                low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
+            )
+            dummy_env.action_space = Box(
+                low=-1.0, high=1.0, shape=(act_dim,), dtype=np.float32
+            )
+            env_configurations.configurations['rlgpu'] = {
+                'env_creator': lambda **kwargs: dummy_env
+            }
+
+        runner = Runner()
+        runner.load_config(params=params)
+        player = runner.create_player()
+
+        player.restore(weights_path)
+
+        model = player.model.to(device).eval()
+        return model
+    finally:
+        # Restore torch.load after model is loaded
+        torch.load = original_torch_load
+
+
 
 
 def run_inference(model, observation, det=True):
-    """
-    Runs inference on a model given an observation.
-
-    Args:
-        model: A PyTorch model.
-        observation: A numpy array containing the observation.
-
-    Returns:
-        A numpy array containing the action.
-    """
-    
     with torch.no_grad():
-        obs_tensor = torch.from_numpy(observation).to('cuda:0').type(torch.float32)
-        obs_dict = {'is_train': False,
-                    'prev_actions': None,
-                    'obs': obs_tensor,
-                    'rnn_states': None}
+        obs_tensor = torch.from_numpy(observation).to('cuda:0').float()
+        obs_dict = {
+            'is_train':    False,
+            'prev_actions': None,
+            'obs':         obs_tensor,
+            'rnn_states':  None
+        }
         action_dict = model(obs_dict)
         actions = action_dict['mus'] if det else action_dict['actions']
-        actions = actions.cpu().numpy()
-
-    return actions
-
+        return actions.cpu().numpy()
 
 
 def run_inference_dict(model, observation):
-    """
-    Runs inference on a model given an observation.
-
-    Args:
-        model: A PyTorch model.
-        observation: A numpy array containing the observation.
-
-    Returns:
-        The action dictionary.
-    """
-    
     with torch.no_grad():
-        obs_tensor = torch.from_numpy(observation).to('cuda:0').type(torch.float32)
-        obs_dict = {'is_train': False,
-                    'prev_actions': None,
-                    'obs': obs_tensor,
-                    'rnn_states': None}
-        action_dict = model(obs_dict)
-        
-    return action_dict
+        obs_tensor = torch.from_numpy(observation).to('cuda:0').float()
+        return model({
+            'is_train':    False,
+            'prev_actions': None,
+            'obs':         obs_tensor,
+            'rnn_states':  None
+        })
