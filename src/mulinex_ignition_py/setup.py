@@ -24,6 +24,8 @@ setup(
             'gostraighton = mulinex_ignition_py.gostraighton:main',    
             'walking = mulinex_ignition_py.walking:main',          
             'move_wheels = mulinex_ignition_py.move_wheels:main',
+            'move_pd = mulinex_ignition_py.move_pd:main',
+            'move_wheels_2 = mulinex_ignition_py.move_wheels_2:main',
         ],
     },
 )

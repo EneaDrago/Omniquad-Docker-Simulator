@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(omni_vel_controller)
+project(wheels_vel_cnt)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -16,11 +16,13 @@ find_package(pi3hat_moteus_int_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(custom_interfaces REQUIRED)
+
 
 
 add_library(
   ${PROJECT_NAME}
-  SHARED src/omni_vel_controller.cpp
+  SHARED src/wheels_vel_cnt.cpp
 )
 target_include_directories(
   ${PROJECT_NAME} PRIVATE include
@@ -37,9 +39,10 @@ ament_target_dependencies(${PROJECT_NAME}
   pi3hat_moteus_int_msgs
   std_srvs
   geometry_msgs
+  custom_interfaces
 )
 
-pluginlib_export_plugin_description_file(controller_interface omni_vel_controller.xml)
+pluginlib_export_plugin_description_file(controller_interface wheels_vel_cnt.xml)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 
@@ -78,7 +81,7 @@ ament_export_dependencies(
   sensor_msgs
   pi3hat_moteus_int_msgs
   std_srvs
-  
+  custom_interfaces
 )
 ament_export_include_directories(
   include

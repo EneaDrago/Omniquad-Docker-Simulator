@@ -1,14 +1,18 @@
 controller_manager:
   ros__parameters:
-    update_rate: 1000 # Hz
+    update_rate: 250 # Hz
 
     joint_state_broadcaster_1:
       type: joint_state_broadcaster/JointStateBroadcaster
     
     ik_leg:
       type: ik_quad_foot_control/IK_Quad_Foot_Controller
-    omni_control:
-      type: omni_vel_controller/OmniVelController   
+      
+    # omni_control:
+    #   type: omni_vel_controller/OmniVelController 
+
+    wheels_vel_controller:
+      type: wheels_vel_cnt/WheelsVelCnt
 
     pd_controller:
       type: rbt_pd_cnt/Rbt_PD_cnt
@@ -25,10 +29,10 @@ joint_state_broadcaster_1:
       - LH_KFE
       - RF_KFE
       - RH_KFE
-      # - LF_WHEEL_JNT
-      # - LH_WHEEL_JNT
-      # - RF_WHEEL_JNT
-      # - RH_WHEEL_JNT
+      - LF_WHEEL_JNT
+      - LH_WHEEL_JNT
+      - RF_WHEEL_JNT
+      - RH_WHEEL_JNT
     use_sim_time: True
 
 ik_leg:
@@ -43,12 +47,21 @@ ik_leg:
       init_feet_pos_z: -0.25
       use_sim_time: True
 
-omni_control:
+wheels_vel_controller:
   ros__parameters:
-    mecanum_angle: 135.0
-    wheel_rad: 0.03875
-    pub_odom: true
-    sim: true
+    joints:
+      - RF_WHEEL_JNT
+      - LF_WHEEL_JNT
+      - RH_WHEEL_JNT
+      - LH_WHEEL_JNT
+    use_sim_time: True
+
+# omni_control:
+#   ros__parameters:
+#     mecanum_angle: 135.0
+#     wheel_rad: 0.03875
+#     pub_odom: true
+#     sim: true
 
 pd_controller:
   ros__parameters:
@@ -67,49 +80,34 @@ pd_controller:
       # - RH_WHEEL_JNT
  
     K_d:
-      - 10.0
-      - 10.0
-      - 10.0
-      - 10.0
-      - 10.0
-      - 10.0
-      - 10.0
-      - 10.0
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      # - 0.8
-      
+      - 5.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 5.0
       # - 0.8   # Wheel joints
       # - 0.8
       # - 0.8
       # - 0.8
+
       
     K_p:
-      - 100.0
-      - 100.0
-      - 100.0
-      - 100.0
-      - 100.0
-      - 100.0
-      - 100.0
-      - 100.0
-      # - 20.9
-      # - 20.9
-      # - 20.9
-      # - 20.9
-      # - 20.9
-      # - 20.9
-      # - 20.9
-      # - 20.9
+      - 50.0
+      - 50.0
+      - 50.0
+      - 50.0
+      - 50.0
+      - 50.0
+      - 50.0
+      - 50.0
       # - 0.0     # Wheel joints
       # - 0.0
       # - 0.0
       # - 0.0
+     
  
  # Nota: Hip: 120° = 2.094 rad, Knee: 60° = 1.047 rad
     init_pos:   # NOTA! Mettere init_pos diverso da 0 

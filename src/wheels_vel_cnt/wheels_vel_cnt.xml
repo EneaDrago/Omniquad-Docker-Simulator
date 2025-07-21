@@ -1,0 +1,9 @@
+<library path="wheels_vel_cnt">
+  <class name="wheels_vel_cnt/WheelsVelCnt" 
+    type="wheels_vel_cnt::WheelsVelCnt"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>
+    Simplified 4-wheel velocity controller
+    </description>
+  </class>
+</library>

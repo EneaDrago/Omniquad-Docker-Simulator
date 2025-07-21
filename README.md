@@ -22,7 +22,7 @@ Nvidia-Container-Toolkit: follow the nvidia-container-toolkit following [this](h
 
 This command launches a docker with ros inside it. The first time you open it, you have to run 
 
-``` colcon build```
+``` colcon build --symlink-install```
 
 
 ## NVIDIA stuff test 
@@ -73,3 +73,6 @@ There are two controllers:
 
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
+
+## LANCIARE UN CONTROLLER:
+```ros2 run controller_manager spawner pd_controller --param-file src/mulinex_ignition/config/mulinex_mf.yaml```

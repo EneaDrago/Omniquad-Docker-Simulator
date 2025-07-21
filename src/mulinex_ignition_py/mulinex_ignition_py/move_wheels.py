@@ -7,6 +7,10 @@ from rclpy.duration import Duration
 from rclpy.time import Time
 
 
+''' This node moves the robot using the omni_velocity controller.
+This controller is used to control the robot's movement in a 2D plane. 
+It takes linear and angular velocities as input, solves the inverse kinematics, and sends commands to the motors.'''
+
 class OmniVelCommander(Node):
     def __init__(self):
         super().__init__('omni_vel_commander')
