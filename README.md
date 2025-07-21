@@ -60,7 +60,7 @@ and then, again: ``` docker compose exec ros2_humble_sim bash```
 
 
 ## Move the robot
-There are two controllers: 
+There are three controllers: 
 - "omni_control" that, given a reference velocity, solves the inverse kinematics and moves the wheels to target the reference velocity.
     - topic from which it reads: /omni_control/command
     - topic message type: pi3hat_moteus_int_msgs/msg/OmniMulinexCommand 
@@ -70,6 +70,10 @@ There are two controllers:
     - topic from which it reads: /pd_controller/command
     - topic message type:JointState (from Sensor_msgs.msg)
     - To test this controller, run ``` ros2 run mulinex_ignition_py getup ```
+- "wheels_vel_cnt", that moves the wheels individually, with a velocity reference.
+    - topic from which it reads: /wheels_vel_controller/wheels_velocity_cmd
+    - topic message type: WheelVelocityCommand (path: docker_simulator/src/custom_interfaces/msg/WheelVelocityCommand.msg)
+    - To test this controller, run ``` ros2 run mulinex_ignition_py move_wheels_2 ```
 
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
