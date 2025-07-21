@@ -99,20 +99,25 @@ class InferenceController(Node):
 
 
         if self.use_imu:
-            self.declare_parameter('imu_topic', '/IMU_Broadcaster/imu')
+            self.declare_parameter('imu_topic', '/omnicar/imu')
             imu_topic = self.get_parameter('imu_topic').value
             self.imu_sub = self.create_subscription(Imu, imu_topic, self.imu_callback, 10)
 
         # --- Buffer di stato ---
-        self.n_joints = 12
-        self.joint_names = [
+        self.n_joints_tot = 12
+        self.n_joints_pos = 8
+        self.joint_names_pos = [
+            'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
+            'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
+        ]
+        self.joint_names_vel = [
             'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
             'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
             'LF_WHEEL_JNT','LH_WHEEL_JNT','RF_WHEEL_JNT','RH_WHEEL_JNT'
         ]
-        self.joint_pos = {n:0.0 for n in self.joint_names}
-        self.joint_vel = {n:0.0 for n in self.joint_names}
-        self.prev_action = np.zeros((self.n_joints,1))
+        self.joint_pos = {n:0.0 for n in self.joint_names_pos}
+        self.joint_vel = {n:0.0 for n in self.joint_names_vel}
+        self.prev_action = np.zeros((self.n_joints_tot,1))
 
         # --- Posa di default e warmup ---
         hip  = np.deg2rad(120.0)
@@ -172,21 +177,36 @@ class InferenceController(Node):
     def inference_callback(self):
         now = self.get_clock().now()
         # costruisco l’osservazione
+
+        # +---------------------------------------------------------+
+        # | Active Observation Terms in Group: 'policy' (shape: (41,)) |
+        # +-----------+---------------------------------+-----------+
+        # |   Index   | Name                            |   Shape   |
+        # +-----------+---------------------------------+-----------+
+        # |     0     | base_ang_vel                    |    (3,)   |
+        # |     1     | projected_gravity               |    (3,)   |
+        # |     2     | velocity_commands               |    (3,)   |
+        # |     3     | joint_pos                       |    (8,)   |
+        # |     4     | joint_vel                       |   (12,)   |
+        # |     5     | actions                         |   (12,)   |
+        # +-----------+---------------------------------+-----------+
+
         obs = np.vstack([
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
             self.cmd_vel * self.cmd_vel_scale,
-            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints,1)), 
-            np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints,1)), 
-            self.prev_action
+            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints_pos,1)), 
+            np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
+            self.prev_action # 12
         ]).reshape((1,-1))
+        self.get_logger().info(f"Observation shape: {obs.shape}\n")
 
         action = run_inference(self.model, obs, det=True).flatten()
-        self.prev_action = action.reshape((self.n_joints,1))
+        self.prev_action = action.reshape((self.n_joints_tot,1))
 
         # warmup default pose
         delta = now - self.start_time
-        elapsed = delta.seconds + delta.nanoseconds * 1e-9
+        elapsed = delta.nanoseconds * 1e-9
         if elapsed < self._warmup_duration:
             target = self.default_pose
         else:
@@ -196,14 +216,17 @@ class InferenceController(Node):
         if self.simulation:
             msg = JointState()
         else:
-            msg = JointsCommand()
-            msg.kp_scale = [1.0]*self.n_joints
-            msg.kd_scale = [1.0]*self.n_joints
+            msg = JointsCommand()                               ########### DA CAMBIARE ###########
+            msg.kp_scale = [1.0]*self.n_joints_tot
+            msg.kd_scale = [1.0]*self.n_joints_tot
 
         msg.header.stamp = now.to_msg()
-        msg.name = self.joint_names
+        msg.name = self.joint_names_vel
         msg.position = target.tolist()
         self.joint_pub.publish(msg)
+        self.get_logger().info(f"Published target: {target}\n")
+        self.get_logger().info(f"Action: {action}\n")
+        
 
 
 def main(args=None):
