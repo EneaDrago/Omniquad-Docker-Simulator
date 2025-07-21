@@ -12,6 +12,8 @@ from pi3hat_moteus_int_msgs.msg import JointsCommand, JointsStates
 
 from .utils.torch_utils import quat_rotate_inverse_numpy
 from .utils.rlg_utils import build_rlg_model, run_inference
+from custom_interfaces.msg import WheelVelocityCommand 
+
 
 
 class InferenceController(Node):
@@ -28,9 +30,12 @@ class InferenceController(Node):
         self.declare_parameter('env_cfg_path', '')
         self.declare_parameter('agent_cfg_path', '')
         self.declare_parameter('simulation', False)
-        self.declare_parameter('joint_state_topic', '/joint_states')
-        self.declare_parameter('joint_target_topic', '/target_joint_states')
+        self.declare_parameter('joint_state_topic', '/Joint_Feedback')
+        self.declare_parameter('wheels_state_topic', '/Wheel_Feedback')
+        self.declare_parameter('joint_target_topic', '/pd_controller/command')                      # topic for joint commands (PD controller)
+        self.declare_parameter('wheels_target_topic', '/wheels_vel_controller/wheels_velocity_cmd') # topic for wheels commands (wheels velocity controller)
         self.declare_parameter('cmd_vel_topic', '/teleop_twist_keyboard')
+        self.declare_parameter('imu_topic', '/omnicar/imu')
         # nuovi parametri per scaling
         self.declare_parameter('angular_velocity_scale', 1.0)
         self.declare_parameter('cmd_vel_scale', 1.0)
@@ -41,10 +46,14 @@ class InferenceController(Node):
         self.agent_cfg_path   = self.get_parameter('agent_cfg_path').value
         self.simulation       = self.get_parameter('simulation').value
         self.joint_state_topic= self.get_parameter('joint_state_topic').value
+        self.wheels_state_topic= self.get_parameter('wheels_state_topic').value
         self.joint_target_topic = self.get_parameter('joint_target_topic').value
+        self.wheels_target_topic = self.get_parameter('wheels_target_topic').value
         self.cmd_vel_topic    = self.get_parameter('cmd_vel_topic').value
         self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
         self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
+        imu_topic             = self.get_parameter('imu_topic').value
+
 
         # init vars
         self.base_ang_vel = np.zeros((3,1))
@@ -81,13 +90,23 @@ class InferenceController(Node):
         # --- Pubblicatori/Sottoscrittori ---
         if self.simulation:
             self.joint_pub = self.create_publisher(JointState, self.joint_target_topic, 10)
+            self.wheels_pub = self.create_publisher(WheelVelocityCommand, self.wheels_target_topic, 10)
+
             self.joint_sub = self.create_subscription(
                 JointState, self.joint_state_topic, self.joint_state_callback, 10
             )
+            self.wheels_sub = self.create_subscription(
+                JointState, self.wheels_state_topic, self.wheels_state_callback, 10
+            )
         else:
             self.joint_pub = self.create_publisher(JointsCommand, self.joint_target_topic, 10)
+            self.wheels_pub = self.create_publisher(WheelVelocityCommand, self.wheels_target_topic, 10)
+
             self.joint_sub = self.create_subscription(
                 JointsStates, self.joint_state_topic, self.joint_state_callback, 10
+            )
+            self.wheels_sub = self.create_subscription(
+                JointState, self.wheels_state_topic, self.wheels_state_callback, 10
             )
         self.cmd_sub = self.create_subscription(
             Twist, self.cmd_vel_topic, self.cmd_vel_callback, 10
@@ -97,10 +116,7 @@ class InferenceController(Node):
         self.use_imu = self.get_parameter('use_imu').value
 
 
-
         if self.use_imu:
-            self.declare_parameter('imu_topic', '/omnicar/imu')
-            imu_topic = self.get_parameter('imu_topic').value
             self.imu_sub = self.create_subscription(Imu, imu_topic, self.imu_callback, 10)
 
         # --- Buffer di stato ---
@@ -174,6 +190,14 @@ class InferenceController(Node):
                 self.joint_pos[name] = pos
                 self.joint_vel[name] = vel
 
+    def wheels_state_callback(self, msg: JointState):
+        """
+        Update current wheels positions and velocities.
+        """
+        for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
+            if name in self.joint_pos:
+                self.joint_vel[name] = vel
+
     def inference_callback(self):
         now = self.get_clock().now()
         # costruisco l’osservazione
@@ -195,7 +219,7 @@ class InferenceController(Node):
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
             self.cmd_vel * self.cmd_vel_scale,
-            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints_pos,1)), 
+            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints_pos,1)), # 8
             np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
             self.prev_action # 12
         ]).reshape((1,-1))
@@ -213,19 +237,34 @@ class InferenceController(Node):
             target = action * self.action_scale.flatten() + self.default_pose
 
         # pubblicazione
+        # Joints
         if self.simulation:
             msg = JointState()
         else:
-            msg = JointsCommand()                               ########### DA CAMBIARE ###########
-            msg.kp_scale = [1.0]*self.n_joints_tot
-            msg.kd_scale = [1.0]*self.n_joints_tot
+            msg = JointsCommand()                              
+            msg.kp_scale = [1.0]*self.n_joints_pos
+            msg.kd_scale = [1.0]*self.n_joints_pos
 
         msg.header.stamp = now.to_msg()
-        msg.name = self.joint_names_vel
-        msg.position = target.tolist()
+        msg.name = self.joint_names_pos
+        msg.position = target[0:8].tolist()
         self.joint_pub.publish(msg)
         self.get_logger().info(f"Published target: {target}\n")
         self.get_logger().info(f"Action: {action}\n")
+        # Wheels
+        msg = WheelVelocityCommand()
+        ''' - LF_WHEEL_JNT
+            - LH_WHEEL_JNT
+            - RF_WHEEL_JNT
+            - RH_WHEEL_JNT
+        '''
+        msg.v_lf = target[8]
+        msg.v_lb = target[9]
+        msg.v_rf = target[10]
+        msg.v_rb = target[11]
+
+        self.wheels_pub.publish(msg)
+
         
 
 

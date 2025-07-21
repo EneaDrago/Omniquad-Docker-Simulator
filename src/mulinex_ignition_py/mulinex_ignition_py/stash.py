@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
 from rclpy.time import Time
-from rclpy.qos import QoSProfile, ReliabilityPolicy, QoSDurabilityPolicy
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_srvs.srv import SetBool
 from custom_interfaces.msg import WheelVelocityCommand 
@@ -16,10 +16,10 @@ class WheelsVelCommander(Node):
         super().__init__('wheels_vel_commander')
 
         # Parametri
-        self.declare_parameter('v_rf', 10.0)
-        self.declare_parameter('v_lf', -10.0)
-        self.declare_parameter('v_rb', -10.0)
-        self.declare_parameter('v_lb', 10.0)
+        self.declare_parameter('v_rf', 100.0)
+        self.declare_parameter('v_lf', -100.0)
+        self.declare_parameter('v_rb', 100.0)
+        self.declare_parameter('v_lb', -100.0)
         self.declare_parameter('publish_rate', 10)
 
         self.v_rf = self.get_parameter('v_rf').get_parameter_value().double_value
@@ -28,14 +28,10 @@ class WheelsVelCommander(Node):
         self.v_lb = self.get_parameter('v_lb').get_parameter_value().double_value
         self.rate_hz = self.get_parameter('publish_rate').get_parameter_value().integer_value
 
-        # qos = QoSProfile(
-        #     depth=10,
-        #     reliability=ReliabilityPolicy.BEST_EFFORT,
-        #     deadline=Duration(nanoseconds=int(1e9 / self.rate_hz + 5e6))
-        # )
         qos = QoSProfile(
             depth=10,
-            reliability=ReliabilityPolicy.RELIABLE    
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            deadline=Duration(nanoseconds=int(1e9 / self.rate_hz + 5e6))
         )
 
         # Publisher
@@ -79,5 +75,3 @@ def main(args=None):
         pass
     node.destroy_node()
     rclpy.shutdown()
-
-

@@ -8,6 +8,8 @@
 #include "controller_interface/controller_interface.hpp"
 #include "rclcpp/subscription.hpp"
 #include "custom_interfaces/msg/wheel_velocity_command.hpp"
+#include "hardware_interface/loaned_state_interface.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 namespace wheels_vel_cnt
 {
@@ -29,6 +31,11 @@ private:
   std::array<double, 4> last_command_ = {0.0, 0.0, 0.0, 0.0};
   std::mutex command_mutex_;
   rclcpp::Subscription<custom_interfaces::msg::WheelVelocityCommand>::SharedPtr cmd_sub_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr wheel_state_pub_;
+
+  //std::vector<std::string> joint_names_;
+  std::vector<double> measured_velocities_;
+  std::vector<double> measured_positions_;
 };
 
 } // namespace wheels_vel_cnt

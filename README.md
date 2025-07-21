@@ -75,6 +75,12 @@ There are three controllers:
     - topic message type: WheelVelocityCommand (path: docker_simulator/src/custom_interfaces/msg/WheelVelocityCommand.msg)
     - To test this controller, run ``` ros2 run mulinex_ignition_py move_wheels_2 ```
 
+## RUN THE INFERENCE
+#### TERMINAL 1:
+This terminal is used to launch Gazebo, the controllers, etc.
+``` source install/setup.bash ```
+
+
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
 
