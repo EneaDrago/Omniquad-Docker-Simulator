@@ -103,7 +103,7 @@ class InferenceController(Node):
             self.wheels_pub = self.create_publisher(WheelVelocityCommand, self.wheels_target_topic, 10)
 
             self.joint_sub = self.create_subscription(
-                JointsStates, self.joint_state_topic, self.joint_state_callback, 10
+                JointState, self.joint_state_topic, self.joint_state_callback, 10
             )
             self.wheels_sub = self.create_subscription(
                 JointState, self.wheels_state_topic, self.wheels_state_callback, 10
@@ -131,8 +131,11 @@ class InferenceController(Node):
             'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
             'LF_WHEEL_JNT','LH_WHEEL_JNT','RF_WHEEL_JNT','RH_WHEEL_JNT'
         ]
-        self.joint_pos = {n:0.0 for n in self.joint_names_pos}
-        self.joint_vel = {n:0.0 for n in self.joint_names_vel}
+        self.wheels_names = [
+            'RF_WHEEL_JNT', 'LF_WHEEL_JNT', 'RH_WHEEL_JNT', 'LH_WHEEL_JNT'
+        ]
+        self.joint_pos = {n:0.0 for n in self.joint_names_pos}  # 8 joints
+        self.joint_vel = {n:0.0 for n in self.joint_names_vel}  # 12 joints
         self.prev_action = np.zeros((self.n_joints_tot,1))
 
         # --- Posa di default e warmup ---
@@ -154,6 +157,9 @@ class InferenceController(Node):
         self.cmd_vel = np.array([
             msg.linear.x, msg.linear.y, msg.angular.z
         ]).reshape((3,1))
+        # self.cmd_vel = np.zeros((3,1))
+        self.get_logger().info(f'Command velocity received: linear-x: {msg.linear.x}, linear-y: {msg.linear.y}, angular-z: {msg.angular.z}')
+
 
     def imu_callback(self, msg: Imu):
         """
@@ -189,14 +195,18 @@ class InferenceController(Node):
             if name in self.joint_pos:
                 self.joint_pos[name] = pos
                 self.joint_vel[name] = vel
+        # self.get_logger().info(f"Joint state (callback):  pos: {self.joint_pos}\nvel: {self.joint_vel}\n")
+
 
     def wheels_state_callback(self, msg: JointState):
         """
         Update current wheels positions and velocities.
         """
         for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
-            if name in self.joint_pos:
+            if name in self.wheels_names:
                 self.joint_vel[name] = vel
+        # self.get_logger().info(f"Wheels vel (callback): {self.joint_vel}\n\n")
+
 
     def inference_callback(self):
         now = self.get_clock().now()
@@ -215,6 +225,9 @@ class InferenceController(Node):
         # |     5     | actions                         |   (12,)   |
         # +-----------+---------------------------------+-----------+
 
+        for name in self.wheels_names:
+            self.joint_vel[name] = 0.0
+
         obs = np.vstack([
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
@@ -223,10 +236,15 @@ class InferenceController(Node):
             np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
             self.prev_action # 12
         ]).reshape((1,-1))
-        self.get_logger().info(f"Observation shape: {obs.shape}\n")
+        # self.get_logger().info(f"OSSERVAZIONE RL: {obs}")
 
         action = run_inference(self.model, obs, det=True).flatten()
         self.prev_action = action.reshape((self.n_joints_tot,1))
+
+        action[8:12] = 0.0
+        self.get_logger().info(f"Action shape: {action.shape}, Action: {action}")
+
+
 
         # warmup default pose
         delta = now - self.start_time
@@ -249,8 +267,8 @@ class InferenceController(Node):
         msg.name = self.joint_names_pos
         msg.position = target[0:8].tolist()
         self.joint_pub.publish(msg)
-        self.get_logger().info(f"Published target: {target}\n")
-        self.get_logger().info(f"Action: {action}\n")
+        # self.get_logger().info(f"Published target: {target}\n")
+        # self.get_logger().info(f"Action: {action}\n")
         # Wheels
         msg = WheelVelocityCommand()
         ''' - LF_WHEEL_JNT

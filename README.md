@@ -76,10 +76,25 @@ There are three controllers:
     - To test this controller, run ``` ros2 run mulinex_ignition_py move_wheels_2 ```
 
 ## RUN THE INFERENCE
-#### TERMINAL 1:
-This terminal is used to launch Gazebo, the controllers, etc.
+
+On every terminal you start: 
+
+``` docker compose exec ros2_humble_sim bash```
+
 ``` source install/setup.bash ```
 
+
+#### TERMINAL 1:
+This terminal is used to launch Gazebo, the controllers, etc.
+``` ros2 launch mulinex_ignition gz_harmonic_sim_w_rbt_PD_wheels.launch.py ```
+
+#### TERMINAL 2:
+The keyboard to control the robot
+``` ros2 run teleop_twist_keyboard teleop_twist_keyboard ```
+
+#### TERMINAL 3:
+The inference node
+``` ros2 launch rlg_quad_controller omniquad_inference.launch.py ```
 
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
