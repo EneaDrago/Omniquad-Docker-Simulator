@@ -54,7 +54,7 @@ params:
     schedule_type: legacy
     kl_threshold: 0.01
     score_to_win: 20000
-    max_epochs: 1000
+    max_epochs: 10000
     save_best_after: 100
     save_frequency: 50
     grad_norm: 1.0
@@ -68,5 +68,5 @@ params:
     clip_value: true
     seq_length: 4
     bounds_loss_coef: 0.0
-    train_dir: /home/enea/IsaacLab/logs/rl_games/omniquad_flat
-    full_experiment_name: 2025-07-17_11-31-56
+    train_dir: /home/simone/IsaacLab/logs/rl_games/omniquad_flat
+    full_experiment_name: 2025-07-22_13-45-01

@@ -58,7 +58,7 @@ class InferenceController(Node):
         # init vars
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
-        self.cmd_vel = np.zeros((3,1))
+        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1)) #np.zeros((3,1))
 
         # --- Caricamento YAML di configurazione ---
         with open(self.env_cfg_path, 'r') as f:
@@ -73,8 +73,8 @@ class InferenceController(Node):
         self.get_logger().info(f'Inference rate: {self.rate_hz:.2f} Hz')
 
         # --- Scaling azioni ---
-        leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
-        wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
+        leg_scale   = 1 #self.env_cfg['actions']['joint_pos']['scale']
+        wheel_scale = 1 #self.env_cfg['actions']['joint_vel']['scale']
         self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 
         # --- Caricamento modello RL‑Games ---
@@ -158,6 +158,7 @@ class InferenceController(Node):
             msg.linear.x, msg.linear.y, msg.angular.z
         ]).reshape((3,1))
         # self.cmd_vel = np.zeros((3,1))
+        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1))
         self.get_logger().info(f'Command velocity received: linear-x: {msg.linear.x}, linear-y: {msg.linear.y}, angular-z: {msg.angular.z}')
 
 
@@ -241,7 +242,7 @@ class InferenceController(Node):
         action = run_inference(self.model, obs, det=True).flatten()
         self.prev_action = action.reshape((self.n_joints_tot,1))
 
-        action[8:12] = 0.0
+        # action[8:12] = 0.0
         self.get_logger().info(f"Action shape: {action.shape}, Action: {action}")
 
 
