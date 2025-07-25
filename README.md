@@ -31,6 +31,18 @@ To test the correct isntallation of the nvidia support you have to start the con
 
 ``` nvidia-smi```
 
+## HOW TO BUILD: 
+If, after deleting the folders "launch", "install" and "log", when trying to build, you will receive an error: ...
+
+Do the following:
+- ```rm -rf build install log```
+- ```colcon build --packages-select pi3hat_moteus_int_msgs --symlink-install```
+- ```source install/setup.bash```
+- ```colcon build --symlink-install```
+- ```source install/setup.bash```
+
+Ignore the warnings and just do whatever you need to.
+
 
 ## LUNCH ROBOT SIMULATION
 
@@ -48,16 +60,6 @@ This terminal is used to run the node to move the robot
 ``` ros2 run mulinex_ignition-py getup ```
 
 
-## TROUBLESHOOT
-If ``` colcon build ``` does not work the first time you launch it during the installation, try to do: 
-
-``` docker rm -f ros2_humble_simulator``` 
-
-``` docker compose up -d``` 
-
-and then, again: ``` docker compose exec ros2_humble_sim bash```
-
-
 
 ## Move the robot
 There are three controllers: 
@@ -73,10 +75,20 @@ There are three controllers:
 - "wheels_vel_cnt", that moves the wheels individually, with a velocity reference.
     - topic from which it reads: /wheels_vel_controller/wheels_velocity_cmd
     - topic message type: WheelVelocityCommand (path: docker_simulator/src/custom_interfaces/msg/WheelVelocityCommand.msg)
-    - To test this controller, run ``` ros2 run mulinex_ignition_py move_wheels_2 ```
+    - To test this controller, run ```ros2 run mulinex_ignition_py move_wheels_2```
 
 ## RUN THE INFERENCE
 
+### SETUP
+- Go to IsaacSim > logs > desired network that you trained
+- Copy the files:
+    - nn/omniquad_flat.pth
+    - params/agent.yaml
+    - params/env.yaml
+- Paste the 3 files in the Gazebo Folder: src/rlg_quad_controller/models
+
+
+### RUN
 On every terminal you start: 
 
 ``` docker compose exec ros2_humble_sim bash```
@@ -98,6 +110,24 @@ The inference node
 
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
+- LANCIARE UN CONTROLLER:  ```ros2 run controller_manager spawner pd_controller --param-file src/mulinex_ignition/config/mulinex_mf.yaml```
+- Verificare i topic emessi da Gazebo (per poi poter fare il bridge): 
+    - per vedere la lista: ```ign topic -l```
+    - per fare l'echo: ```ign topic -e -t /mulinex/imu```
+- Avvio manuale del bridge Gazebo --> ROS: ```ros2 run ros_gz_bridge parameter_bridge /mulinex/imu@sensor_msgs/msg/Imu[ignition.msgs.IMU```
 
-## LANCIARE UN CONTROLLER:
-```ros2 run controller_manager spawner pd_controller --param-file src/mulinex_ignition/config/mulinex_mf.yaml```
+
+
+## TROUBLESHOOT
+- If ``` colcon build ``` does not work the first time you launch it during the installation, try to do: 
+    - ``` docker rm -f ros2_humble_simulator``` 
+    - ``` docker compose up -d``` 
+    - and then, again: ``` docker compose exec ros2_humble_sim bash```
+- PROBLEMI INTERCORSI NEL PASSAGGIO GAZEBO --> ROS2:
+    - scrittura di tutto il codice per controllers e inference
+    - nel GitHub dei PhD di Unipi era presente una inference un po' diversa rispetto a quella di Gazebo. Quindi, a parità di obs dati in input alla rete, si ottenevano actions diverse. Abbiamo sostituito l'inference copiando e incollando la stessa funzione.
+    - su IsaacSim i "joints_pos" all'interno del vettore obs contiene angoli di deviazione rispetto alla posizione di default (Knee: 120°, Hip: 60°; entrambi espressi in radianti) e quindi sono valori molto vicini a 0. Invece, su ROS2 le letture sono degli angoli rispetto alla posizione orizzontale, quindi occorre sottrarre il valore di default delle gambe prima di passare il vettore obs alla rete.
+    - I valori delle angular velocity e delle projected gravity erano uguali a zero. Questo era dovuto al fatto che il bridge Gazebo->ROS non era settato bene. Gazebo pubblicava su un topic "mulinex/imu" mentre ROS cercava di creare il bridge per il topic "omnicar/imu". Si è quindi sostituito questo nome del topic in:
+        - mulinex.xacro
+        - file di launch "gz_harmonic_sim_W_rbt_PD_wheels.launch.py"
+        - file di inference "inference_controller.py"

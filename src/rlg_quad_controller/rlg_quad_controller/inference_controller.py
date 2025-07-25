@@ -58,7 +58,7 @@ class InferenceController(Node):
         # init vars
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
-        self.cmd_vel = np.array([1, 0, 0]).reshape((3,1)) #np.zeros((3,1))
+        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1)) #np.zeros((3,1))
 
         # --- Caricamento YAML di configurazione ---
         with open(self.env_cfg_path, 'r') as f:
@@ -158,8 +158,8 @@ class InferenceController(Node):
             msg.linear.x, msg.linear.y, msg.angular.z
         ]).reshape((3,1))
         # self.cmd_vel = np.zeros((3,1))
-        self.cmd_vel = np.array([1, 0, 0]).reshape((3,1))
-        self.get_logger().info(f'Command velocity received: linear-x: {msg.linear.x}, linear-y: {msg.linear.y}, angular-z: {msg.angular.z}')
+        # self.cmd_vel = np.array([1, 0, 0]).reshape((3,1))
+        self.get_logger().info(f'\nCommand velocity received: linear-x: {msg.linear.x}, linear-y: {msg.linear.y}, angular-z: {msg.angular.z}\n')
 
 
     def imu_callback(self, msg: Imu):
