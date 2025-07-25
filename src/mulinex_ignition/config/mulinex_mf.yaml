@@ -1,5 +1,7 @@
 controller_manager:
   ros__parameters:
+    imu_topic: "/omnicar/imu"
+
     update_rate: 250 # Hz
 
     joint_state_broadcaster_1:

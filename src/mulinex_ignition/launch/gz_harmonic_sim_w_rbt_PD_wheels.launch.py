@@ -99,7 +99,7 @@ def generate_launch_description():
             )
     robot_namespace_arg = DeclareLaunchArgument(
                 "robot_namespace",
-                default_value="omnicar/",
+                default_value="mulinex/",
                 description="Robot Name",
             )
     pub_tf_gt_arg = DeclareLaunchArgument(

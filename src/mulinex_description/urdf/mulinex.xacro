@@ -4,6 +4,7 @@
     <xacro:include filename="$(find mulinex_description)/urdf/links.xacro" />
     <xacro:include filename="$(find mulinex_description)/urdf/leg.xacro" />
     <xacro:include filename="$(find mulinex_description)/urdf/material.xacro" />
+    <xacro:include filename="$(find mulinex_description)/urdf/imu_sensor.xacro" />
    
     <xacro:arg name="use_gazebo" default="true" />
 
@@ -82,6 +83,8 @@
         simplify_meshes="$(arg simplify_meshes_lower_leg)"
         feet_type="$(arg feet_type)" 
         />
+    
+    <xacro:imu_sensor namespace="/mulinex"/>
 
     <xacro:if value="$(arg use_gazebo)">
         <gazebo reference="base_link">

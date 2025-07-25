@@ -9,14 +9,13 @@ from gym.spaces import Box
 import torch
 import numpy.core.multiarray
 from torch.serialization import add_safe_globals
-from rl_games.algos_torch.torch_ext import safe_load
 
 
 
-def build_rlg_model(weights_path: str,
+def build_rlg_player(weights_path: str,
                     env_cfg_path: str,
                     agent_cfg_path: str,
-                    device: str = "cuda:0") -> torch.nn.Module:
+                    device: str = "cuda:0"):
 
 
     # --- patch temporanea torch.load con safe globals ---
@@ -59,8 +58,8 @@ def build_rlg_model(weights_path: str,
 
         player.restore(weights_path)
 
-        model = player.model.to(device).eval()
-        return model
+        player.model.to(device).eval()
+        return player
     finally:
         # Restore torch.load after model is loaded
         torch.load = original_torch_load
@@ -68,18 +67,10 @@ def build_rlg_model(weights_path: str,
 
 
 
-def run_inference(model, observation, det=True):
-    with torch.no_grad():
-        obs_tensor = torch.from_numpy(observation).to('cuda:0').float()
-        obs_dict = {
-            'is_train':    False,
-            'prev_actions': None,
-            'obs':         obs_tensor,
-            'rnn_states':  None
-        }
-        action_dict = model(obs_dict)
-        actions = action_dict['mus'] if det else action_dict['actions']
-        return actions.cpu().numpy()
+def run_inference(player, observation, det=True):
+    obs_torch = torch.from_numpy(observation).to('cuda:0').float()
+    action = player.get_action(obs_torch, is_deterministic=det)
+    return action.cpu().numpy()
 
 
 def run_inference_dict(model, observation):

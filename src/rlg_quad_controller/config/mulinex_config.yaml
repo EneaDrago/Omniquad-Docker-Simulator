@@ -5,7 +5,7 @@ inference_controller:
     joint_state_topic: "/state_broadcaster/joints_state"
     joint_target_pos_topic: "/joint_controller/command"
     cmd_vel_topic: "/cmd_vel"
-    imu_topic: "/IMU_Broadcaster/imu"
+    imu_topic: "/omnicar/imu"
     rate: 100
     use_imu: True
     env_cfg_path: "/home/ros/docker_simulation_ws/src/rlg_quad_controller/models/omni_flat_v1/env.yaml"

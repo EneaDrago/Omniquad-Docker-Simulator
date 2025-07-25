@@ -11,10 +11,10 @@ from geometry_msgs.msg import Twist
 from pi3hat_moteus_int_msgs.msg import JointsCommand, JointsStates
 
 from .utils.torch_utils import quat_rotate_inverse_numpy
-from .utils.rlg_utils import build_rlg_model, run_inference
+from .utils.rlg_utils import build_rlg_player, run_inference
 from custom_interfaces.msg import WheelVelocityCommand 
 
-
+import time
 
 class InferenceController(Node):
     """
@@ -35,7 +35,7 @@ class InferenceController(Node):
         self.declare_parameter('joint_target_topic', '/pd_controller/command')                      # topic for joint commands (PD controller)
         self.declare_parameter('wheels_target_topic', '/wheels_vel_controller/wheels_velocity_cmd') # topic for wheels commands (wheels velocity controller)
         self.declare_parameter('cmd_vel_topic', '/teleop_twist_keyboard')
-        self.declare_parameter('imu_topic', '/omnicar/imu')
+        self.declare_parameter('imu_topic', '/mulinex/imu')
         # nuovi parametri per scaling
         self.declare_parameter('angular_velocity_scale', 1.0)
         self.declare_parameter('cmd_vel_scale', 1.0)
@@ -58,7 +58,7 @@ class InferenceController(Node):
         # init vars
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
-        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1)) #np.zeros((3,1))
+        self.cmd_vel = np.array([1, 0, 0]).reshape((3,1)) #np.zeros((3,1))
 
         # --- Caricamento YAML di configurazione ---
         with open(self.env_cfg_path, 'r') as f:
@@ -73,13 +73,13 @@ class InferenceController(Node):
         self.get_logger().info(f'Inference rate: {self.rate_hz:.2f} Hz')
 
         # --- Scaling azioni ---
-        leg_scale   = 1 #self.env_cfg['actions']['joint_pos']['scale']
-        wheel_scale = 1 #self.env_cfg['actions']['joint_vel']['scale']
+        leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
+        wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
         self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 
         # --- Caricamento modello RL‑Games ---
         self.get_logger().info(f"Loading rl‑games checkpoint: {self.model_path}")
-        self.model = build_rlg_model(
+        self.player = build_rlg_player(
             weights_path   = self.model_path,
             env_cfg_path   = self.env_cfg_path,
             agent_cfg_path = self.agent_cfg_path,
@@ -158,7 +158,7 @@ class InferenceController(Node):
             msg.linear.x, msg.linear.y, msg.angular.z
         ]).reshape((3,1))
         # self.cmd_vel = np.zeros((3,1))
-        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1))
+        self.cmd_vel = np.array([1, 0, 0]).reshape((3,1))
         self.get_logger().info(f'Command velocity received: linear-x: {msg.linear.x}, linear-y: {msg.linear.y}, angular-z: {msg.angular.z}')
 
 
@@ -180,8 +180,9 @@ class InferenceController(Node):
             msg.orientation.z
         ]
         yaw, pitch, roll = t3d.euler.quat2euler(quat, axes='szyx')
+        self.yaw_bias = 0.0
         corrected = t3d.euler.euler2quat(
-            self.yaw_bias, pitch, roll, axes='szyx'
+            yaw, pitch, roll, axes='szyx'
         )
         self.base_quat = np.array(corrected).reshape((4, 1))
         self.projected_gravity = quat_rotate_inverse_numpy(
@@ -226,25 +227,47 @@ class InferenceController(Node):
         # |     5     | actions                         |   (12,)   |
         # +-----------+---------------------------------+-----------+
 
-        for name in self.wheels_names:
-            self.joint_vel[name] = 0.0
+        # for name in self.wheels_names:
+        #     self.joint_vel[name] = 0.0
 
         obs = np.vstack([
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
             self.cmd_vel * self.cmd_vel_scale,
-            np.fromiter(self.joint_pos.values(), dtype=float).reshape((self.n_joints_pos,1)), # 8
+            # np.fromiter(self.joint_pos.values() - self.default_pose[0:8], dtype=float).reshape((self.n_joints_pos,1)), # 8
+            (np.array(list(self.joint_pos.values())) - self.default_pose[0:8]).reshape((self.n_joints_pos,1)), # 8   #np.zeros((8,1)),
             np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
             self.prev_action # 12
         ]).reshape((1,-1))
         # self.get_logger().info(f"OSSERVAZIONE RL: {obs}")
 
-        action = run_inference(self.model, obs, det=True).flatten()
+
+        # obs = np.array([[
+        #     -7.3413e-01, -4.9844e-01, -1.8524e-01,  1.0361e-02,  3.6034e-02,
+        #     -1.0303e+00,  1.0000e+00,  0.0000e+00, -0.0000e+00, -1.0728e-01,
+        #     -4.0791e-01,  3.2821e-01, -1.8986e-01,  8.9756e-03, -6.2530e-02,
+        #     -1.1988e-02, -5.1432e-02,  2.5427e+00, -2.2847e-01, -1.6544e+00,
+        #     -1.8129e+00,  7.4929e-01,  7.1045e+00, -2.7388e+00,  8.2183e+00,
+        #     9.6702e+00,  9.6817e+00,  5.3614e+00,  1.0157e+01,  1.7997e-01,
+        #     3.2596e-01, -8.4879e-01, -2.2894e-01,  2.0105e-01,  9.0680e-02,
+        #     -3.5459e-01,  3.5399e-01,  1.0000e+00,  1.0000e+00,  5.0096e-01,
+        #     1.0000e+00
+        # ]])
+
+        action = run_inference(self.player, obs, det=True).flatten()
+
+        # action = np.array([ 0.5663, -0.1318, -0.0210, -0.4200,  0.9181,  0.0695,  0.0098,  0.2165,
+        #   1.0000,  1.0000,  1.0000,  1.0000])
+
         self.prev_action = action.reshape((self.n_joints_tot,1))
+        
 
         # action[8:12] = 0.0
-        self.get_logger().info(f"Action shape: {action.shape}, Action: {action}")
+        self.get_logger().info(f"obs: {obs}")
 
+        self.get_logger().info(f"Action shape: {action.shape}, Action: {action}")
+        # time.sleep(10)
+        
 
 
         # warmup default pose
@@ -277,10 +300,15 @@ class InferenceController(Node):
             - RF_WHEEL_JNT
             - RH_WHEEL_JNT
         '''
-        msg.v_lf = target[8]
-        msg.v_lb = target[9]
-        msg.v_rf = target[10]
-        msg.v_rb = target[11]
+        # mapping RL -> Gazebo controller (posizione nella lista del controller)
+        action_wheels = [target[8], target[9], target[10], target[11]]
+        # IsaacLab order: [LF, LH, RF, RH]
+        # Gazebo order:   [RF, LF, RH, LH]
+
+        msg.v_rf = action_wheels[2]  # RF_WHEEL_JNT <-- RF (idx 2)
+        msg.v_lf = action_wheels[0]  # LF_WHEEL_JNT <-- LF (idx 0)
+        msg.v_rb = action_wheels[3]  # RH_WHEEL_JNT <-- RH (idx 3)
+        msg.v_lb = action_wheels[1]  # LH_WHEEL_JNT <-- LH (idx 1)
 
         self.wheels_pub.publish(msg)
 

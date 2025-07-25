@@ -21,7 +21,7 @@ def generate_launch_description():
             {'agent_cfg_path':  agent_path},
             {'model_path':      model_path},
             {'use_imu':         True},
-            {'imu_topic':       '/omnicar/imu'},
+            {'imu_topic':       '/mulinex/imu'},
             {'joint_state_topic':       '/Joint_Feedback'},
             # se vuoi, puoi aggiungere override per gli scale:
             # {'angular_velocity_scale': 1.0},
