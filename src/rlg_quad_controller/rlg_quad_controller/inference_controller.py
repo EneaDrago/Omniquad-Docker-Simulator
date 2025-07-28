@@ -29,7 +29,7 @@ class InferenceController(Node):
         self.declare_parameter('model_path', '')
         self.declare_parameter('env_cfg_path', '')
         self.declare_parameter('agent_cfg_path', '')
-        self.declare_parameter('simulation', False)
+        self.declare_parameter('simulation', True)
         self.declare_parameter('joint_state_topic', '/Joint_Feedback')
         self.declare_parameter('wheels_state_topic', '/Wheel_Feedback')
         self.declare_parameter('joint_target_topic', '/pd_controller/command')                      # topic for joint commands (PD controller)
@@ -99,7 +99,7 @@ class InferenceController(Node):
                 JointState, self.wheels_state_topic, self.wheels_state_callback, 10
             )
         else:
-            self.joint_pub = self.create_publisher(JointsCommand, self.joint_target_topic, 10)
+            self.joint_pub = self.create_publisher(JointsCommand, self.joint_target_topic, 10)   # JointsCommand changed to JointState
             self.wheels_pub = self.create_publisher(WheelVelocityCommand, self.wheels_target_topic, 10)
 
             self.joint_sub = self.create_subscription(
@@ -283,9 +283,9 @@ class InferenceController(Node):
         if self.simulation:
             msg = JointState()
         else:
-            msg = JointsCommand()                              
-            msg.kp_scale = [1.0]*self.n_joints_pos
-            msg.kd_scale = [1.0]*self.n_joints_pos
+            msg = JointsCommand()        # JointsCommand changed to JointState                      
+            # msg.kp_scale = [1.0]*self.n_joints_pos
+            # msg.kd_scale = [1.0]*self.n_joints_pos
 
         msg.header.stamp = now.to_msg()
         msg.name = self.joint_names_pos
@@ -293,6 +293,7 @@ class InferenceController(Node):
         self.joint_pub.publish(msg)
         # self.get_logger().info(f"Published target: {target}\n")
         # self.get_logger().info(f"Action: {action}\n")
+
         # Wheels
         msg = WheelVelocityCommand()
         ''' - LF_WHEEL_JNT
