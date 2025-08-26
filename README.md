@@ -131,3 +131,8 @@ The inference node
         - mulinex.xacro
         - file di launch "gz_harmonic_sim_W_rbt_PD_wheels.launch.py"
         - file di inference "inference_controller.py"
+
+
+
+
+## INPUTS & OUTPUTS della rete:

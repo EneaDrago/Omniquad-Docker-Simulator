@@ -58,7 +58,7 @@ class InferenceController(Node):
         # init vars
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
-        self.cmd_vel = np.array([0.5, 0, 0]).reshape((3,1)) #np.zeros((3,1))
+        self.cmd_vel = np.array([0, 1, 0]).reshape((3,1)) #np.zeros((3,1))
 
         # --- Caricamento YAML di configurazione ---
         with open(self.env_cfg_path, 'r') as f:
@@ -123,27 +123,38 @@ class InferenceController(Node):
         self.n_joints_tot = 12
         self.n_joints_pos = 8
         self.joint_names_pos = [
-            'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
-            'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
+            'LF_HFE','LH_HFE','LF_KFE','LH_KFE',
+            'RF_HFE','RH_HFE','RF_KFE','RH_KFE',
         ]
         self.joint_names_vel = [
-            'LF_HFE','LH_HFE','RF_HFE','RH_HFE',
-            'LF_KFE','LH_KFE','RF_KFE','RH_KFE',
+            'LF_HFE','LH_HFE','LF_KFE','LH_KFE',
+            'RF_HFE','RH_HFE','RF_KFE','RH_KFE',
             'LF_WHEEL_JNT','LH_WHEEL_JNT','RF_WHEEL_JNT','RH_WHEEL_JNT'
         ]
         self.wheels_names = [
-            'RF_WHEEL_JNT', 'LF_WHEEL_JNT', 'RH_WHEEL_JNT', 'LH_WHEEL_JNT'
+            'LF_WHEEL_JNT','LH_WHEEL_JNT','RF_WHEEL_JNT','RH_WHEEL_JNT'
+            # 'RF_WHEEL_JNT', 'LF_WHEEL_JNT', 'RH_WHEEL_JNT', 'LH_WHEEL_JNT'
         ]
         self.joint_pos = {n:0.0 for n in self.joint_names_pos}  # 8 joints
         self.joint_vel = {n:0.0 for n in self.joint_names_vel}  # 12 joints
         self.prev_action = np.zeros((self.n_joints_tot,1))
 
         # --- Posa di default e warmup ---
-        hip  = np.deg2rad(120.0)
-        knee = np.deg2rad(60.0)
+        hip  = 2.0 #np.deg2rad(120.0)
+        knee = 1.2 # np.deg2rad(60.0)
         self.default_pose = np.array([
-            hip, -hip, -hip, hip,
-            -knee, knee, knee, -knee,
+            hip, -knee, -hip, knee,
+            -hip, knee, hip, -knee,
+            0,0,0,0
+        ])
+
+        '''giunti in ordine:
+        LF_HFE, LF_KFE, LH_HFE, LH_KFE,
+        RF_HFE, RF_KFE, RH_HFE, RH_KFE,'''
+
+        self.default_pose_out = np.array([
+            hip, -hip, -knee, knee,
+            -hip, hip, knee, -knee,
             0,0,0,0
         ])
         self._warmup_duration = 3.0
@@ -235,30 +246,28 @@ class InferenceController(Node):
             self.projected_gravity,
             self.cmd_vel * self.cmd_vel_scale,
             # np.fromiter(self.joint_pos.values() - self.default_pose[0:8], dtype=float).reshape((self.n_joints_pos,1)), # 8
-            (np.array(list(self.joint_pos.values())) - self.default_pose[0:8]).reshape((self.n_joints_pos,1)), # 8   #np.zeros((8,1)),
+            (np.array(list(self.joint_pos.values())) - self.default_pose[0:8]).reshape((self.n_joints_pos,1)), # 8   #
+            # np.zeros((8,1)),
             np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
             self.prev_action # 12
         ]).reshape((1,-1))
         # self.get_logger().info(f"OSSERVAZIONE RL: {obs}")
 
 
-        # obs = np.array([[
-        #     -7.3413e-01, -4.9844e-01, -1.8524e-01,  1.0361e-02,  3.6034e-02,
-        #     -1.0303e+00,  1.0000e+00,  0.0000e+00, -0.0000e+00, -1.0728e-01,
-        #     -4.0791e-01,  3.2821e-01, -1.8986e-01,  8.9756e-03, -6.2530e-02,
-        #     -1.1988e-02, -5.1432e-02,  2.5427e+00, -2.2847e-01, -1.6544e+00,
-        #     -1.8129e+00,  7.4929e-01,  7.1045e+00, -2.7388e+00,  8.2183e+00,
-        #     9.6702e+00,  9.6817e+00,  5.3614e+00,  1.0157e+01,  1.7997e-01,
-        #     3.2596e-01, -8.4879e-01, -2.2894e-01,  2.0105e-01,  9.0680e-02,
-        #     -3.5459e-01,  3.5399e-01,  1.0000e+00,  1.0000e+00,  5.0096e-01,
-        #     1.0000e+00
-        # ]])
+        # obs = np.array([[ 3.2594e-01, -2.3234e-01, -2.7869e-01,  4.1866e-02,  8.7518e-03,
+        #  -9.8466e-01, -1.0000e+00,  0.0000e+00, -0.0000e+00,  5.8767e-03,
+        #   4.6360e-05, -6.2503e-04,  1.6232e-02, -2.2629e-02, -5.8667e-04,
+        #  -1.2844e-02, -7.5313e-04,  3.0514e+00, -8.5331e-02,  8.4353e-01,
+        #  -1.9722e+00,  5.6217e-01,  1.4813e+00,  4.3434e-01, -7.8986e-01,
+        #  -1.1325e+01, -9.9201e+00, -9.2747e+00, -1.0420e+01,  4.3723e-01,
+        #  -4.1304e-01,  2.6036e-01, -1.6077e-01, -9.7949e-02, -6.3750e-01,
+        #  -1.6319e-01, -1.1261e-01, -1.0000e+00, -1.0000e+00, -1.0000e+00,
+        #  -1.0000e+00]])
+
 
         action = run_inference(self.player, obs, det=True).flatten()
 
-        # action = np.array([ 0.5663, -0.1318, -0.0210, -0.4200,  0.9181,  0.0695,  0.0098,  0.2165,
-        #   1.0000,  1.0000,  1.0000,  1.0000])
-
+        #action[:8] = 0.0  # blocco le gambe
         self.prev_action = action.reshape((self.n_joints_tot,1))
         
 
@@ -293,7 +302,7 @@ class InferenceController(Node):
         self.joint_pub.publish(msg)
         # self.get_logger().info(f"Published target: {target}\n")
         # self.get_logger().info(f"Action: {action}\n")
-
+        
         # Wheels
         msg = WheelVelocityCommand()
         ''' - LF_WHEEL_JNT
@@ -313,7 +322,6 @@ class InferenceController(Node):
 
         self.wheels_pub.publish(msg)
 
-        
 
 
 def main(args=None):
