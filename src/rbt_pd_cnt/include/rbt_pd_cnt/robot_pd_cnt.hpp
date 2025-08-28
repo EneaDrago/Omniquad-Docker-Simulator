@@ -11,12 +11,15 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-#include "realtime_tools/realtime_buffer.h"
+// #include "realtime_tools/realtime_buffer.h"
+#include "realtime_tools/realtime_buffer.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "pi3hat_moteus_int_msgs/msg/joints_command.hpp"
 
 namespace rbt_pd_cnt
 {
     using CmdType = sensor_msgs::msg::JointState;
+    using CmdTypeSub = pi3hat_moteus_int_msgs::msg::JointsCommand;
     using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
     class Rbt_PD_cnt : public controller_interface::ControllerInterface
     {
@@ -41,8 +44,12 @@ namespace rbt_pd_cnt
                 const rclcpp::Time & time, const rclcpp::Duration & period
             ) override;
         protected:
+
+            //real time buffer
+            realtime_tools::RealtimeBuffer<std::shared_ptr<CmdTypeSub>> rt_command_ptr_;
+
             // subscriber 
-            rclcpp::Subscription<CmdType>::SharedPtr jnt_cmd_sub_;
+            rclcpp::Subscription<CmdTypeSub>::SharedPtr jnt_cmd_sub_;
             rclcpp::Publisher<CmdType>::SharedPtr jnt_stt_pub_;
             // logger name
             std::string logger_name_;
@@ -56,8 +63,6 @@ namespace rbt_pd_cnt
           
             bool first_time_;
 
-            //real time buffer
-            realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>> rt_command_ptr_;
 
 
     };

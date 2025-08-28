@@ -82,3 +82,49 @@ def run_inference_dict(model, observation):
             'obs':         obs_tensor,
             'rnn_states':  None
         })
+
+
+
+def run_inference_chat(player, observation, det: bool = True):
+    """
+    Esegue l'inferenza in modo robusto.
+    - det=True: usa la mean della distribuzione (niente sampling ⇒ niente std negativa).
+    - det=False: sampling stocastico, con clamp minimo sulla std.
+    Accetta observation con shape (obs_dim,) o (1, obs_dim); ritorna (act_dim,).
+    """
+    # Sanifica e sistemazione shape
+    obs = np.asarray(observation, dtype=np.float32)
+    if obs.ndim == 1:
+        obs = obs[None, ...]  # (1, obs_dim)
+
+    # Evita NaN/Inf che fanno esplodere la sigma
+    if not np.isfinite(obs).all():
+        obs = np.nan_to_num(obs, nan=0.0, posinf=1e6, neginf=-1e6)
+
+    obs_t = torch.from_numpy(obs).to(player.device)
+
+    with torch.no_grad():
+        out = player.model({'obs': obs_t})
+
+        # rl-games di solito restituisce un dict con la distribuzione
+        if isinstance(out, dict):
+            if 'action_distribution' in out:
+                distr = out['action_distribution']
+                # Clamp di sicurezza sulla std (se presente come .scale)
+                if hasattr(distr, 'scale'):
+                    distr.scale.clamp_(min=1e-6)
+                action_t = distr.mean if det else distr.sample()
+            elif 'action' in out:  # fallback: alcuni modelli danno già l'azione
+                action_t = out['action']
+            else:
+                # ultimo fallback: se il dict ha altro formato
+                raise RuntimeError("Output del model non riconosciuto: manca 'action_distribution'/'action'")
+        else:
+            # Se il modello restituisce direttamente un tensore azione
+            if torch.is_tensor(out):
+                action_t = out
+            else:
+                raise RuntimeError("Output del model non riconosciuto")
+
+    # shape finale (act_dim,)
+    return action_t.squeeze(0).detach().cpu().numpy()

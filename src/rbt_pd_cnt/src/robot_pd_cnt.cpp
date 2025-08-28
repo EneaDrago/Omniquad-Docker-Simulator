@@ -93,9 +93,9 @@ namespace rbt_pd_cnt
         jnt_stt_.set__velocity(zeros);
         jnt_stt_.set__effort(zeros);
         
-        jnt_cmd_sub_ = get_node()->create_subscription<CmdType>(
+        jnt_cmd_sub_ = get_node()->create_subscription<CmdTypeSub>(
             "~/command", rclcpp::SystemDefaultsQoS(),
-            [this](const CmdType::SharedPtr msg){rt_command_ptr_.writeFromNonRT(msg);}
+            [this](const CmdTypeSub::SharedPtr msg){rt_command_ptr_.writeFromNonRT(msg);}
         );
         jnt_stt_pub_ = get_node()->create_publisher<CmdType>("Joint_Feedback",10);
 

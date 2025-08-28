@@ -115,6 +115,36 @@ The inference node
     - per vedere la lista: ```ign topic -l```
     - per fare l'echo: ```ign topic -e -t /mulinex/imu```
 - Avvio manuale del bridge Gazebo --> ROS: ```ros2 run ros_gz_bridge parameter_bridge /mulinex/imu@sensor_msgs/msg/Imu[ignition.msgs.IMU```
+- convertire il file rosbag .db3 in .mcap: 
+    - salvarsi il file convert.yaml, entrarci e modificare il nome dell'output con il nome desiderato
+    - lanciare il comando ```ros2 bag convert -i <nome_cartella_rosbag> -o convert.yaml```
+
+## REGISTRARE LA ROSBAG:
+Lanciare il comando ``` ros2 launch mulinex_ignition_py rosbag_rec.launch.py ```
+
+## CONNETTERSI AL ROBOT FISICO:
+Su un nuovo terminale, ti connetti al robot: 
+- apri il docker
+- ```ssh mulsbc@100.100.100.3```  --> password: 123456
+- ```sudo su``` --> password 123456
+- ```cd mulinex_ws/```
+- ```source install/setup.bash```
+- ```export ROS_DOMAIN_ID=1```
+- ```ros2 launch pi3hat_hw_interface start_MJBots_Pi3Hat_hw_Interface.py urdf_file:=omni_mulinex.xacro conf_file:=omniquad_joy.yaml```
+- Quando poi vorrai spegnere il robot, digita ```shutdown now```, poi puoi staccare la corrente al robot
+
+Su un nuovo terminale, lancerai i nodi dal tuo PC per controllare il robot:
+- apri il docker
+- ```export ROS_DOMAIN_ID=1```
+- ```ros2 launch mulinex_ignition_py controller_start_launch.py```
+- ora lancia tutti i nodi che vuoi:
+    - Getup: ```ros2 run mulinex_ignition_py getup_omni_1```
+    - run della rosbag: ```ros2 bag play rosbag/run_20250827_140849 --topics /joint_controller/command```
+    - INFERENCE:
+        - su un terminale, devi lanciare il nodo che fa da bridge tra i topic di ROS e quelli del robot: ```ros2 run mulinex_ignition_py bridge_node```
+        - su un altro terminale, lanci il nodo di inference: ```ros2 launch rlg_quad_controller omniquad_inference.launch.py```
+        - su un terzo terminale, lancia la teleop_twist_keyboard
+
 
 
 
@@ -131,3 +161,5 @@ The inference node
         - mulinex.xacro
         - file di launch "gz_harmonic_sim_W_rbt_PD_wheels.launch.py"
         - file di inference "inference_controller.py"
+
+

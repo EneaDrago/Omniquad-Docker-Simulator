@@ -12,9 +12,9 @@ services:
         - WORKSPACE=docker_simulation_ws
 
     container_name: ros2_humble_simulator
-    networks:
-      - ros2_internal
-    # network_mode: "host"
+    # networks:
+    #   - ros2_internal
+    network_mode: "host"
     # Interactive shell settings
     stdin_open: true
     tty: true
@@ -25,8 +25,8 @@ services:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
       - XAUTHORITY=/tmp/.docker.xauth
-      - ROS_DOMAIN_ID=28
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
       # Shell history
       - HISTFILE=/home/ros/.bash_history
       - HISTFILESIZE=10000

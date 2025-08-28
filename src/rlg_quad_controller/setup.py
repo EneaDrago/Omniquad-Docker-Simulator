@@ -43,7 +43,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'inference_controller = rlg_quad_controller.inference_controller:main',
+            'inference_controller_robot = rlg_quad_controller.inference_controller_robot:main',
+            'inference_controller_sim = rlg_quad_controller.inference_controller_sim:main',
+
             'force_measure = rlg_quad_controller.force_measure:main',
             'trajectory_publisher = rlg_quad_controller.trajectory_publisher:main'
         ],

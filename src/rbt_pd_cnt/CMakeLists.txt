@@ -15,6 +15,7 @@ find_package(hardware_interface REQUIRED)
 find_package(realtime_tools REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(pi3hat_moteus_int_msgs REQUIRED)
 
 add_library(
   rbt_pd_cnt
@@ -34,6 +35,7 @@ ament_target_dependencies(rbt_pd_cnt
   realtime_tools
   std_msgs
   sensor_msgs
+  pi3hat_moteus_int_msgs
 )
 
 pluginlib_export_plugin_description_file(controller_interface rbt_pd_cnt.xml)
