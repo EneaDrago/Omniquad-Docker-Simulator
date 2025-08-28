@@ -1,7 +1,6 @@
 /build 
 /install
 /log
-/src
 core
 core.*
 /rosbag*
