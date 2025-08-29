@@ -68,20 +68,25 @@ wheels_vel_controller:
 pd_controller:
   ros__parameters:
     joint:
-      - LF_HFE        # Left HIP Front
-      - LF_KFE        # Left KNEE Front
-      - LH_HFE        # Left HIP Back
-      - LH_KFE        # Left KNEE Back
-      - RF_HFE        # Right HIP Front
-      - RF_KFE        # Right KNEE Front
-      - RH_HFE        # Right HIP Back
-      - RH_KFE        # Right KNEE Back
-      # - LF_WHEEL_JNT    
-      # - LH_WHEEL_JNT
-      # - RF_WHEEL_JNT
-      # - RH_WHEEL_JNT
+      - LF_HFE
+      - LH_HFE
+      - RF_HFE
+      - RH_HFE
+      - LF_KFE
+      - LH_KFE
+      - RF_KFE
+      - RH_KFE
+      # Previously, the order was (NOTE: this might be the order in the real robot!!):
+      # - LF_HFE        # Left HIP Front
+      # - LF_KFE        # Left KNEE Front
+      # - LH_HFE        # Left HIP Back
+      # - LH_KFE        # Left KNEE Back
+      # - RF_HFE        # Right HIP Front
+      # - RF_KFE        # Right KNEE Front
+      # - RH_HFE        # Right HIP Back
+      # - RH_KFE        # Right KNEE Back
       
- 
+
     K_d:
       - 10.0
       - 10.0
@@ -114,14 +119,14 @@ pd_controller:
  
  # Nota: Hip: 120° = 2.094 rad, Knee: 60° = 1.047 rad
     init_pos:   # NOTA! Mettere init_pos diverso da 0 
-      - 2.094
-      - -1.047
-      - -2.094
-      - 1.047
-      - -2.094
-      - 1.047
-      - 2.094
-      - -1.047
+      - 2.094        # - LF_HFE        # Left HIP Front
+      - -2.094       # - LH_HFE        # Left HIP Back
+      - -2.094       # - RF_HFE        # Right HIP Front
+      - 2.094        # - RH_HFE        # Right HIP Back
+      - -1.047       # - LF_KFE        # Left KNEE Front
+      - 1.047        # - LH_KFE        # Left KNEE Back
+      - 1.047        # - RF_KFE        # Right KNEE Front
+      - -1.047       # - RH_KFE        # Right KNEE Back
       # - 0.0   # Wheel joints
       # - 0.0
       # - 0.0

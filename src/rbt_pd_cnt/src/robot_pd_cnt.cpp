@@ -205,7 +205,7 @@ namespace rbt_pd_cnt
         {
           //  RCLCPP_INFO(get_node()->get_logger(),"steady controll");
         }
-         else
+        else
         {
             jnt_cmd_.set__position((*joint_command)->position);
             jnt_cmd_.set__velocity((*joint_command)->velocity);

@@ -1,3 +1,5 @@
+// IL CONTROLLORE FA FEEDFORWARD SENZA MOLTI ARTEFICI. USARE ROBOT_PD_CONTROLLER!
+
 #include <cmath>
 #include "rbt_pd_cnt/real_pd_cnt.hpp"
 

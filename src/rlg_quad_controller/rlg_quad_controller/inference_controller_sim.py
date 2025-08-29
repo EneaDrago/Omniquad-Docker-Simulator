@@ -227,9 +227,6 @@ class InferenceController(Node):
         # |     5     | actions                         |   (12,)   |
         # +-----------+---------------------------------+-----------+
 
-        # for name in self.wheels_names:
-        #     self.joint_vel[name] = 0.0
-
         obs = np.vstack([
             self.base_ang_vel * self.angular_vel_scale,
             self.projected_gravity,
@@ -239,36 +236,18 @@ class InferenceController(Node):
             np.fromiter(self.joint_vel.values(), dtype=float).reshape((self.n_joints_tot,1)), # 12
             self.prev_action # 12
         ]).reshape((1,-1))
-        # self.get_logger().info(f"OSSERVAZIONE RL: {obs}")
-
-
-        # obs = np.array([[
-        #     -7.3413e-01, -4.9844e-01, -1.8524e-01,  1.0361e-02,  3.6034e-02,
-        #     -1.0303e+00,  1.0000e+00,  0.0000e+00, -0.0000e+00, -1.0728e-01,
-        #     -4.0791e-01,  3.2821e-01, -1.8986e-01,  8.9756e-03, -6.2530e-02,
-        #     -1.1988e-02, -5.1432e-02,  2.5427e+00, -2.2847e-01, -1.6544e+00,
-        #     -1.8129e+00,  7.4929e-01,  7.1045e+00, -2.7388e+00,  8.2183e+00,
-        #     9.6702e+00,  9.6817e+00,  5.3614e+00,  1.0157e+01,  1.7997e-01,
-        #     3.2596e-01, -8.4879e-01, -2.2894e-01,  2.0105e-01,  9.0680e-02,
-        #     -3.5459e-01,  3.5399e-01,  1.0000e+00,  1.0000e+00,  5.0096e-01,
-        #     1.0000e+00
-        # ]])
 
         action = run_inference(self.player, obs, det=True).flatten()
 
-        # action = np.array([ 0.5663, -0.1318, -0.0210, -0.4200,  0.9181,  0.0695,  0.0098,  0.2165,
-        #   1.0000,  1.0000,  1.0000,  1.0000])
-
         self.prev_action = action.reshape((self.n_joints_tot,1))
 
-        # action[8:12] = 0.0
+        # Stop the wheels if cmd_vel is zero
+        if self.cmd_vel[0] == 0 and self.cmd_vel[1] == 0 and self.cmd_vel[2] == 0:
+            action[8:12] = 0.0
+
         self.get_logger().info(f"obs: {obs}")
-
         self.get_logger().info(f"Action shape: {action.shape}, Action: {action}")
-        # time.sleep(10)
         
-
-
         # warmup default pose
         delta = now - self.start_time
         elapsed = delta.nanoseconds * 1e-9
@@ -277,7 +256,7 @@ class InferenceController(Node):
         else:
             target = action * self.action_scale.flatten() + self.default_pose
 
-        # pubblicazione
+        # PUBLISH COMMANDS
         # Joints
         if self.simulation:
             msg = JointState()
@@ -288,10 +267,9 @@ class InferenceController(Node):
 
         msg.header.stamp = now.to_msg()
         msg.name = self.joint_names_pos
-        msg.position = target[0:8].tolist()
-        #self.joint_pub.publish(msg)
-        # self.get_logger().info(f"Published target: {target}\n")
-        # self.get_logger().info(f"Action: {action}\n")
+        msg.position = target[0:8].tolist()  #result_pos
+        self.joint_pub.publish(msg)
+        
         # Wheels
         msg = WheelVelocityCommand()
         ''' - LF_WHEEL_JNT
@@ -311,7 +289,6 @@ class InferenceController(Node):
 
         self.wheels_pub.publish(msg)
 
-        
 
 
 def main(args=None):

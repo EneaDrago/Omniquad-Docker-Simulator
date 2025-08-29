@@ -146,6 +146,49 @@ Su un nuovo terminale, lancerai i nodi dal tuo PC per controllare il robot:
         - su un terzo terminale, lancia la teleop_twist_keyboard
 
 
+## ORDINE DEI GIUNTI
+### Action date da ISAACSIM
+La rete addestrata su IsaacSim restituisce delle action che hanno il seguente ordine:
+```python
+["LF_HFE", "LH_HFE", "RF_HFE", "RH_HFE", "LF_KFE", "LH_KFE", "RF_KFE", "RH_KFE", "LF_ANKLE", "LH_ANKLE", "RF_ANKLE", "RH_ANKLE"]
+```
+e i segni sono così: 
+```python
+[2.0, -2.0, -2.0, 2.0, -1.2, 1.2, 1.2, -1.2, 0.0, 0.0, 0.0, 0.0]
+```
+
+### Simulazione
+#### Giunti delle gambe
+Quando usi ROS2 con Gazebo, i messaggi che si passano a ```/pd_controller/command``` hanno lo stesso ordine di IsaacSim:
+```python
+["LF_HFE", "LH_HFE", "RF_HFE", "RH_HFE", "LF_KFE", "LH_KFE", "RF_KFE", "RH_KFE"]
+```
+le posizioni di default cambiano leggermente, impostando angoli di 120° e 60°.
+```python 
+[2.094, -2.094, -2.094, 2.094, -1.047, 1.047, 1.047, -1.047]
+```
+Questi sono infatti i valori impostati nel file mulinex_mf.yaml
+
+#### Ruote
+Le velocità delle ruote vanno mandate al controllore ```wheels_vel_cnt``` inviando sul topic  
+```/wheels_vel_controller/wheels_velocity_cmd``` messaggi del tipo ```custom_interfaces.msg.WheelVelocityCommand```, che sono fatti così:
+```yaml
+float64 v_rf
+float64 v_lf
+float64 v_rb
+float64 v_lb
+``` 
+NOTA: per usarlo, c'è da fare un mapping tra le action di IsaacSim e il controller! Puoi vedere come è implementato nel file ```rlg_quad_controller/rlg_quad_controller/inference_controller_sim.py```
+
+### ROBOT REALE
+Il topic su cui pubblicare i messaggi per muovere i giunti si chiama ```joint_controller/command```. Tale topic controlla tutti i giunti, sia quelli delle gambe che quelli delle ruote. I messaggi da mandare devono essere del tipo standard ```JointsCommand```.
+
+Abbiamo deciso di mantenere le pubblicazioni su tutti i topic che usavamo in simulazione, e semplicemente di aggiungere un nodo ```mulinex_ignition_py/bridge_node.py``` per fare i mappaggi.
+
+#### Giunti delle gambe
+??
+#### Ruote
+I comandi sono uguali a quelli per la simulazione, ma bisogna invertire l'ordine delle ruote di sinistra!
 
 
 ## TROUBLESHOOT
