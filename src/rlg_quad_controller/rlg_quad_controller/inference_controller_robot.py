@@ -52,11 +52,14 @@ class InferenceController(Node):
         self.wheels_target_topic = self.get_parameter('wheels_target_topic').value
         self.cmd_vel_topic    = self.get_parameter('cmd_vel_topic').value
         self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
+        self.angular_vel_scale = 0.0
         self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
         imu_topic             = self.get_parameter('imu_topic').value
 
 
         # init vars
+        self.start_time_movement = None
+
         self.base_ang_vel = np.zeros((3,1))
         self.projected_gravity = np.zeros((3,1))
         self.cmd_vel = np.array([0.9, 0, 0]).reshape((3,1)) #np.zeros((3,1))
@@ -74,9 +77,10 @@ class InferenceController(Node):
         self.get_logger().info(f'Inference rate: {self.rate_hz:.2f} Hz')
 
         # --- Scaling azioni ---
-        leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
+        self.leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
+        self.leg_scale = 0.4
         wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
-        self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
+        self.action_scale = np.array([self.leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 
         # --- Caricamento modello RL‑Games ---
         self.get_logger().info(f"Loading rl‑games checkpoint: {self.model_path}")
@@ -190,7 +194,7 @@ class InferenceController(Node):
         )
         self.base_quat = np.array(corrected).reshape((4, 1))
         self.projected_gravity = quat_rotate_inverse_numpy(
-            self.base_quat, np.array([0, 0, -1]).reshape((3, 1))
+            self.base_quat, np.array([0, 0, -9.81]).reshape((3, 1))
         )
 
     def joint_state_callback(self, msg: JointsStates):
@@ -259,7 +263,7 @@ class InferenceController(Node):
         default_pose_8 = self.default_pose[:8].astype(np.float32)
         joint_pos_err = joint_pos_arr - default_pose_8  # errore rispetto alla pose di riferimento
 
-        base_ang_vel = (self.base_ang_vel * self.angular_vel_scale).astype(np.float32).reshape(-1)
+        base_ang_vel = (self.base_ang_vel * self.angular_vel_scale).astype(np.float32).reshape(-1)  
         proj_gravity = self.projected_gravity.astype(np.float32).reshape(-1)
         cmd_vel      = (self.cmd_vel * self.cmd_vel_scale).astype(np.float32).reshape(-1)
         prev_action  = self.prev_action.astype(np.float32).reshape(-1)
@@ -304,13 +308,10 @@ class InferenceController(Node):
 
         action = run_inference(self.player, obs, det=True).flatten()
 
-        # action = np.array([ 0.5663, -0.1318, -0.0210, -0.4200,  0.9181,  0.0695,  0.0098,  0.2165,
-        #   1.0000,  1.0000,  1.0000,  1.0000])
-
         self.prev_action = action.reshape((self.n_joints_tot,1))
         
         if self.cmd_vel[0] == 0 and self.cmd_vel[1] == 0 and self.cmd_vel[2] == 0:
-            action[8:12] = 0.0
+            action[0:12] = 0.0
 
         # action[8:12] = 0.0
         self.get_logger().info(f"obs: {obs}")
@@ -326,6 +327,27 @@ class InferenceController(Node):
         if elapsed < self._warmup_duration:
             target = self.default_pose
         else:
+            # DEGUB DEI MOVIMENTI - SET MANUALE DELLE ACTION
+            ramp = 0.0
+            if self.start_time_movement is None:
+                self.start_time_movement = now
+            else: 
+                elapsed_movement = (now - self.start_time_movement).nanoseconds * 1e-9
+                if elapsed_movement < 10:
+                    # ramp up
+                    ramp = elapsed_movement/10  * self.leg_scale
+                # elif elapsed_movement < 6:
+                #     # ramp down
+                #     ramp = 0.5 - (elapsed_movement - 3)/3 * 0.5
+                else: 
+                    ramp = self.leg_scale
+            
+            # wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
+            # self.action_scale = np.array([ramp]*8 + [wheel_scale]*4).reshape((12,1))
+            self.action_scale[:8] = ramp    
+            # action = np.array([ 0.0, -0.0, -0.0, 0.0,  0.0,  0.0,  0.0,  ramp,
+            # 0.5000,  0.0000,  0.0000,  0.0000])
+
             target = action * self.action_scale.flatten() + self.default_pose
 
         # pubblicazione
@@ -340,7 +362,8 @@ class InferenceController(Node):
         msg.header.stamp = now.to_msg()
         msg.name = self.joint_names_pos
         msg.position = target[0:8].tolist()
-        #self.joint_pub.publish(msg)
+        self.joint_pub.publish(msg)
+
         # self.get_logger().info(f"Published target: {target}\n")
         # self.get_logger().info(f"Action: {action}\n")
         # Wheels

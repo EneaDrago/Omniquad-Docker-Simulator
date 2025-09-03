@@ -106,7 +106,7 @@ The keyboard to control the robot
 
 #### TERMINAL 3:
 The inference node
-``` ros2 launch rlg_quad_controller omniquad_inference.launch.py ```
+``` ros2 launch rlg_quad_controller omniquad_inference_sim.launch.py ```
 
 ## USEFUL COMMANDS
 - ``` ros2 run rqt_graph rqt_graph ``` shows a graph with all the nodes and all the topics and who writes where
@@ -120,7 +120,10 @@ The inference node
     - lanciare il comando ```ros2 bag convert -i <nome_cartella_rosbag> -o convert.yaml```
 
 ## REGISTRARE LA ROSBAG:
-Lanciare il comando ``` ros2 launch mulinex_ignition_py rosbag_rec.launch.py ```
+Se vuoi lanciare tutto il pacchetto di simulazione+teleoptwistkeyboard, lanciare il comando ``` ros2 launch mulinex_ignition_py rosbag_rec.launch.py ```
+
+Il comando generico per salvare una bag è: ```ros2 bag record -a -s mcap -o benchmark_vel_x_pos_v1```
+
 
 ## CONNETTERSI AL ROBOT FISICO:
 Su un nuovo terminale, ti connetti al robot: 
@@ -142,7 +145,7 @@ Su un nuovo terminale, lancerai i nodi dal tuo PC per controllare il robot:
     - run della rosbag: ```ros2 bag play rosbag/run_20250827_140849 --topics /joint_controller/command```
     - INFERENCE:
         - su un terminale, devi lanciare il nodo che fa da bridge tra i topic di ROS e quelli del robot: ```ros2 run mulinex_ignition_py bridge_node```
-        - su un altro terminale, lanci il nodo di inference: ```ros2 launch rlg_quad_controller omniquad_inference.launch.py```
+        - su un altro terminale, lanci il nodo di inference: ```ros2 launch rlg_quad_controller omniquad_inference_robot.launch.py```
         - su un terzo terminale, lancia la teleop_twist_keyboard
 
 
@@ -196,6 +199,7 @@ I comandi sono uguali a quelli per la simulazione, ma bisogna invertire l'ordine
     - ``` docker rm -f ros2_humble_simulator``` 
     - ``` docker compose up -d``` 
     - and then, again: ``` docker compose exec ros2_humble_sim bash```
+If it still dosn't work, probably you get an error while building the package ```mulinex_ignition```. To resolve it, build only the mulinex_ignition package with ```colcon build --packages-select mulinex_ignition```, and then build again everything with ``` colcon build --symlink-install```
 - PROBLEMI INTERCORSI NEL PASSAGGIO GAZEBO --> ROS2:
     - scrittura di tutto il codice per controllers e inference
     - nel GitHub dei PhD di Unipi era presente una inference un po' diversa rispetto a quella di Gazebo. Quindi, a parità di obs dati in input alla rete, si ottenevano actions diverse. Abbiamo sostituito l'inference copiando e incollando la stessa funzione.
