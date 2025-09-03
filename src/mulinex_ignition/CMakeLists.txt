@@ -34,6 +34,25 @@ install(TARGETS
     gt_odom_pub
     DESTINATION lib/${PROJECT_NAME})
 
+# move_wheels node
+add_executable(move_wheels src/move_wheels.cpp)
+ament_target_dependencies(
+    move_wheels
+    geometry_msgs
+    nav_msgs
+    rclcpp
+    tf2
+    tf2_ros
+    pi3hat_moteus_int_msgs
+    std_srvs
+)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
+install(TARGETS
+    move_wheels
+    DESTINATION lib/${PROJECT_NAME})
+
 # getup_node
 add_executable(getup_node
   src/getup.cpp
@@ -50,6 +69,7 @@ install(
   DIRECTORY launch config  world  models
       DESTINATION share/${PROJECT_NAME}
 )
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

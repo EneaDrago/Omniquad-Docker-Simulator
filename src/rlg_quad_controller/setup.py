@@ -8,10 +8,10 @@ data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
-        # (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
-        # (os.path.join('share', package_name, 'models'), glob('models/*/*.pth')),
-        # (os.path.join('share', package_name, 'models'), glob('models/*/*.yaml'))
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+        (os.path.join('share', package_name, 'models'), glob('models/*/*.pth')),
+        (os.path.join('share', package_name, 'models'), glob('models/*/*.yaml'))
     ]
 
 def package_files(data_files, directory_list):
@@ -43,7 +43,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'inference_controller = rlg_quad_controller.inference_controller:main',
+            'inference_controller_robot = rlg_quad_controller.inference_controller_robot:main',
+            'inference_controller_sim = rlg_quad_controller.inference_controller_sim:main',
+
             'force_measure = rlg_quad_controller.force_measure:main',
             'trajectory_publisher = rlg_quad_controller.trajectory_publisher:main'
         ],

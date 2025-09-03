@@ -9,44 +9,45 @@ class GoStraightOn(Node):
     def __init__(self):
         super().__init__('gostraighton')
 
-        # Publisher 1: per il controllo posizione delle gambe
+        # Publisher per il controllo delle gambe (posizione)
         self.leg_pub = self.create_publisher(JointState, '/pd_controller/command', 10)
 
-        # Publisher 2: per il controllo velocità delle ruote
+        # Publisher per il controllo delle ruote (velocità)
         self.wheel_pub = self.create_publisher(Twist, '/omni_control/cmd_vel', 10)
 
+        # Nomi dei giunti delle gambe
         self.joint_names = [
             "LF_HFE", "LH_HFE", "RF_HFE", "RH_HFE",     # anche
             "LF_KFE", "LH_KFE", "RF_KFE", "RH_KFE",     # ginocchia
         ]
 
-        hip = math.pi * 120.0 / 180.0
-        knee = math.pi * 60.0 / 180.0
+        # Posizione target per ciascun giunto
+        hip = math.radians(120)
+        knee = math.radians(60)
 
-        # Posizioni fisse per HFE/KFE
         self.fixed_positions = [
-            hip,   -knee,            # Left HIP front, Left KNEE front
-           -hip,    knee,            # Left HIP back, Left KNEE back
-           -hip,   knee,             # Right HIP front, Right KNEE front
-            hip,  -knee,             # Right HIP back, Right KNEE back
-
+            hip,   -knee,   # LF
+           -hip,    knee,   # LH
+           -hip,    knee,   # RF
+            hip,   -knee    # RH
         ]
 
-        self.forward_speed = 10.0  # m/s — modifica in base al robot
+        # Velocità desiderata in avanti (realistica)
+        self.forward_speed = 0.3  # m/s
 
-        # Timer per pubblicare comandi a 50 Hz
+        # Timer per pubblicare le posizioni delle gambe (50 Hz)
         self.timer_leg = self.create_timer(0.02, self.send_command_leg)
-        self.timer_wheel = self.create_timer(0.02, self.send_command_wheel)
 
-        self.get_logger().info("✅ Nodo 'gostraighton' avviato")
+        # Timer per pubblicare velocità alle ruote (10 Hz è sufficiente)
+        self.timer_wheel = self.create_timer(0.1, self.send_command_wheel)
+
+        self.get_logger().info("✅ Nodo 'gostraighton' avviato e in funzione")
 
     def send_command_leg(self):
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.name = self.joint_names
         msg.position = self.fixed_positions
-        msg.velocity = [0.0] * len(self.fixed_positions)
-        msg.effort = [0.0] * len(self.fixed_positions)
 
         self.leg_pub.publish(msg)
 

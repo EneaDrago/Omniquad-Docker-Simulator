@@ -1,0 +1,4 @@
+output_bags:
+  - uri: avanti_indietro_mcap
+    storage_id: mcap
+    all_topics: true

@@ -56,23 +56,41 @@ namespace omni_vel_controller
         deadmis_to_ = dur;
 
         // fill base to wheel kin matrix
+        int r0 = 0, r1 = 1, r2 = 2, r3 = 3;
 
-        base2Wheel_matrix_[0][0] = -1.0/wr;
-        base2Wheel_matrix_[0][1] = -1.0/wr;
-        base2Wheel_matrix_[0][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+        base2Wheel_matrix_[r0][0] = 1.0/wr;
+        base2Wheel_matrix_[r0][1] = 1.0/wr;
+        base2Wheel_matrix_[r0][2] = (ds_x - ds_y*(1/std::tan(ma)))/wr;
         
 
-        base2Wheel_matrix_[1][0] = 1.0/wr;
-        base2Wheel_matrix_[1][1] = -1.0/wr;
-        base2Wheel_matrix_[1][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+        base2Wheel_matrix_[r1][0] = 1.0/wr;
+        base2Wheel_matrix_[r1][1] = -1.0/wr;
+        base2Wheel_matrix_[r1][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
 
-        base2Wheel_matrix_[2][0] = 1.0/wr;
-        base2Wheel_matrix_[2][1] = 1.0/wr;
-        base2Wheel_matrix_[2][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+        base2Wheel_matrix_[r2][0] = 1.0/wr;
+        base2Wheel_matrix_[r2][1] = 1.0/wr;
+        base2Wheel_matrix_[r2][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
 
-        base2Wheel_matrix_[3][0] = -1.0/wr;
-        base2Wheel_matrix_[3][1] = 1.0/wr;
-        base2Wheel_matrix_[3][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+        base2Wheel_matrix_[r3][0] = 1.0/wr;
+        base2Wheel_matrix_[r3][1] = -1.0/wr;
+        base2Wheel_matrix_[r3][2] = (ds_x - ds_y*(1/std::tan(ma)))/wr;
+        // -------------------------------------
+        // base2Wheel_matrix_[r0][0] = -1.0/wr;
+        // base2Wheel_matrix_[r0][1] = -1.0/wr;
+        // base2Wheel_matrix_[r0][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+        
+
+        // base2Wheel_matrix_[r1][0] = 1.0/wr;
+        // base2Wheel_matrix_[r1][1] = -1.0/wr;
+        // base2Wheel_matrix_[r1][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+
+        // base2Wheel_matrix_[r2][0] = 1.0/wr;
+        // base2Wheel_matrix_[r2][1] = 1.0/wr;
+        // base2Wheel_matrix_[r2][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
+
+        // base2Wheel_matrix_[r3][0] = -1.0/wr;
+        // base2Wheel_matrix_[r3][1] = 1.0/wr;
+        // base2Wheel_matrix_[r3][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
 
         odom_matrix_[0][0] = (wr /4);
         odom_matrix_[0][1] = -(wr /4);
