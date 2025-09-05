@@ -52,7 +52,7 @@ class InferenceController(Node):
         self.wheels_target_topic = self.get_parameter('wheels_target_topic').value
         self.cmd_vel_topic    = self.get_parameter('cmd_vel_topic').value
         self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
-        self.angular_vel_scale = 0.0
+        # self.angular_vel_scale = 0.0
         self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
         imu_topic             = self.get_parameter('imu_topic').value
 
@@ -78,7 +78,7 @@ class InferenceController(Node):
 
         # --- Scaling azioni ---
         self.leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
-        self.leg_scale = 0.4
+        # self.leg_scale = 0.5
         wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
         self.action_scale = np.array([self.leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 
@@ -194,7 +194,7 @@ class InferenceController(Node):
         )
         self.base_quat = np.array(corrected).reshape((4, 1))
         self.projected_gravity = quat_rotate_inverse_numpy(
-            self.base_quat, np.array([0, 0, -9.81]).reshape((3, 1))
+            self.base_quat, np.array([0, 0, -1]).reshape((3, 1))
         )
 
     def joint_state_callback(self, msg: JointsStates):

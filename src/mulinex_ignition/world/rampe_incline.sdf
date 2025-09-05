@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <world name="rampe_test_thin_fix">
+
+    <!-- Fisica -->
+    <physics name="ode" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+    <gravity>0 0 -9.81</gravity>
+
+    <!-- Luce direzionale -->
+    <light type="directional" name="sun">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>-0.5 0.5 -1</direction>
+      <cast_shadows>true</cast_shadows>
+    </light>
+
+    <!-- Ground -->
+    <model name="ground">
+      <static>true</static>
+      <link name="link">
+        <collision name="col"><geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry></collision>
+        <visual name="vis">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <material><ambient>0.4 0.4 0.4 1</ambient><diffuse>0.45 0.45 0.45 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Parametri rampe: L=5, W=2, T=0.05. Affiancate lungo Y (0,3,6,9,12,15,18). Si sale verso +X. -->
+
+    <!-- 4° -->
+    <model name="rampa_04">
+      <static>true</static>
+      <pose>2.495 0 0.097 0 0.069813 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.35 0.65 0.95 1</ambient><diffuse>0.35 0.65 0.95 1</diffuse></material></visual>
+      </link>
+    </model>
+
+
+    <!-- 8° -->
+    <model name="rampa_08">
+      <static>true</static>
+      <pose>2.474 3 0.271 0 0.139626 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.40 0.85 0.40 1</ambient><diffuse>0.40 0.85 0.40 1</diffuse></material></visual>
+      </link>
+    </model>
+
+
+    <!-- 12° -->
+    <model name="rampa_12">
+      <static>true</static>
+      <pose>2.442 6 0.442 0 0.209440 0</pose>
+        <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.95 0.65 0.35 1</ambient><diffuse>0.95 0.65 0.35 1</diffuse></material></visual>
+      </link>
+    </model>
+
+
+    <!-- 16° -->
+    <model name="rampa_16">
+      <static>true</static>
+      <pose>2.398 9 0.611 0 0.279253 0</pose>
+        <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.85 0.35 0.75 1</ambient><diffuse>0.85 0.35 0.75 1</diffuse></material></visual>
+      </link>
+    </model>
+
+
+    <!-- 20° -->
+    <model name="rampa_20">
+      <static>true</static>
+      <pose>2.343 12 0.777 0 0.349066 0</pose>
+        <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.70 0.70 0.70 1</ambient><diffuse>0.70 0.70 0.70 1</diffuse></material></visual>
+      </link>
+    </model>
+
+
+    <!-- 24° -->
+    <model name="rampa_24">
+      <static>true</static>
+      <pose>2.276 15 0.938 0 0.418879 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.30 0.85 0.85 1</ambient><diffuse>0.30 0.85 0.85 1</diffuse></material></visual>
+      </link>
+    </model>
+    
+
+    <!-- 28° -->
+    <model name="rampa_28">
+      <static>true</static>
+      <pose>2.198 18 1.094 0 0.488692 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>5 2 0.005</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>5 2 0.005</size></box></geometry>
+          <material><ambient>0.95 0.30 0.30 1</ambient><diffuse>0.95 0.30 0.30 1</diffuse></material></visual>
+      </link>
+    </model>
+   
+
+    <!-- Start area DAVANTI alle rampe >
+    <model name="start_area">
+      <static>true</static>
+      <pose>-4 9 0.05 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>3 23 0.1</size></box></geometry></collision>
+        <visual name="vis">
+          <geometry><box><size>3 23 0.1</size></box></geometry>
+          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model-->
+
+    <!-- Camera: vista frontale verso +X -->
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>6 9 5 0 -0.2 3.14159</pose>
+      </camera>
+    </gui>
+
+  </world>
+</sdf>

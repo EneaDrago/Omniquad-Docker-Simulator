@@ -1,0 +1,4 @@
+Questo addestramento fa tremare poco le gambe ancora meno! (0.01- 0.04 rad circa)
+Tuttavia, va solo avanti e indietro, no traslazioni, no rotazioni.
+Tiene benino la linea retta quando va avanti.
+Sale abbastanza bene le slope.

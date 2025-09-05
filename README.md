@@ -128,7 +128,8 @@ Il comando generico per salvare una bag è: ```ros2 bag record -a -s mcap -o ben
 ## CONNETTERSI AL ROBOT FISICO:
 Su un nuovo terminale, ti connetti al robot: 
 - apri il docker
-- ```ssh mulsbc@100.100.100.3```  --> password: 123456
+    - Se sei su WiFi (nome WiFi: MulSbcWiFi, Pass:1234567890): ```ssh mulsbc@192.168.10.1```  --> password: 123456
+    - Se sei con Ethernet: ```ssh mulsbc@100.100.100.3```  --> password: 123456
 - ```sudo su``` --> password 123456
 - ```cd mulinex_ws/```
 - ```source install/setup.bash```
@@ -147,7 +148,7 @@ Su un nuovo terminale, lancerai i nodi dal tuo PC per controllare il robot:
         - su un terminale, devi lanciare il nodo che fa da bridge tra i topic di ROS e quelli del robot: ```ros2 run mulinex_ignition_py bridge_node```
         - su un altro terminale, lanci il nodo di inference: ```ros2 launch rlg_quad_controller omniquad_inference_robot.launch.py```
         - su un terzo terminale, lancia la teleop_twist_keyboard
-
+- Lanciare il qualysis: ros2 launch qualisys_driver qualisys.launch.py
 
 ## ORDINE DEI GIUNTI
 ### Action date da ISAACSIM

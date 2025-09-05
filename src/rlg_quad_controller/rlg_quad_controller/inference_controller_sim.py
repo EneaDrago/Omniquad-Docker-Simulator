@@ -51,7 +51,7 @@ class InferenceController(Node):
         self.wheels_target_topic = self.get_parameter('wheels_target_topic').value
         self.cmd_vel_topic    = self.get_parameter('cmd_vel_topic').value
         self.angular_vel_scale= self.get_parameter('angular_velocity_scale').value
-        self.angular_vel_scale = 0.0  # DEBUG
+        # self.angular_vel_scale = 0.0  # DEBUG
         self.cmd_vel_scale    = self.get_parameter('cmd_vel_scale').value
         imu_topic             = self.get_parameter('imu_topic').value
 
@@ -75,7 +75,7 @@ class InferenceController(Node):
 
         # --- Scaling azioni ---
         leg_scale   = self.env_cfg['actions']['joint_pos']['scale']
-        leg_scale = 0.4  # DEBUG
+        # leg_scale = 0.4  # DEBUG
         wheel_scale = self.env_cfg['actions']['joint_vel']['scale']
         self.action_scale = np.array([leg_scale]*8 + [wheel_scale]*4).reshape((12,1))
 

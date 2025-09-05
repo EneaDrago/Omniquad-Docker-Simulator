@@ -59,7 +59,7 @@ def generate_launch_description():
     
     world_name_arg = DeclareLaunchArgument(
                 "world_name",
-                default_value="empty.sdf",
+                default_value="rampe_incline.sdf",
                 description="World Name ",
             )
 
