@@ -187,7 +187,7 @@ def extract(mcap_path: str, out_dir: str):
                 vals.append(arr[idx])
         return ts, vals
 
-    # Determine how many joints to compare (by your screenshots, 12)
+    # Determine how many joints to compare (in the mulinex robot, 12)
     n_cmd = len(cmd_names_sample) if cmd_names_sample is not None else 0
     n_st  = len(st_names_sample)  if st_names_sample  is not None else 0
     n = max(n_cmd, n_st)
