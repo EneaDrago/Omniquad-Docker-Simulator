@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """
 Compute body-frame velocity from wheel speeds (Mecanum 4W) and compare against
-body-frame velocity obtained from rigid-body pose differentiation.
+body-frame velocity obtained from rigid-body vicon differentiation.
 
 Additions:
 - Detect movement start/end using |v_x| > 0.10 m/s (10 cm/s) with hysteresis (off at 0.08 m/s).
-- Plot the difference (v_x_wheels - v_x_pose) and draw vertical lines at start/end times.
+- Plot the difference (v_x_wheels - v_x_vicon) and draw vertical lines at start/end times.
 - Compute mean absolute error over the motion interval and save to CSV.
 
 Usage:
@@ -136,7 +136,7 @@ def extract(mcap_path: str, out_dir: str):
 
     # Geometry & indices (edit if needed)
     r = 0.05    # wheel radius [m]
-    lx = 0.15   # half-length x from center to wheel [m]
+    lx = 0.25   # half-length x from center to wheel [m]
     ly = 0.15   # half-length y from center to wheel [m]
     idx_lf = 9  # JointState.velocity indices
     idx_rf = 8
@@ -144,7 +144,7 @@ def extract(mcap_path: str, out_dir: str):
     idx_rb = 11
 
     wheels_buf: List[Tuple[float, float, float, float, float]] = []  # t, w_lf, w_rf, w_lb, w_rb
-    pose_buf: List[Tuple[float, float, float, float, float, float, float]] = []  # t, px,py,pz,qx,qy,qz,qw
+    vicon_buf: List[Tuple[float, float, float, float, float, float, float]] = []  # t, px,py,pz,qx,qy,qz,qw
 
     first_time_ns: Optional[int] = None
 
@@ -184,17 +184,17 @@ def extract(mcap_path: str, out_dir: str):
                     qy = float(parse_field_path(ros_msg, "rigidbodies[3]/pose/orientation/y"))
                     qz = float(parse_field_path(ros_msg, "rigidbodies[3]/pose/orientation/z"))
                     qw = float(parse_field_path(ros_msg, "rigidbodies[3]/pose/orientation/w"))
-                    pose_buf.append((t, px, py, pz, qx, qy, qz, qw))
+                    vicon_buf.append((t, px, py, pz, qx, qy, qz, qw))
                 except Exception:
                     pass
 
     if len(wheels_buf) == 0:
         raise RuntimeError("No wheel velocities found. Check the indices and topic name.")
-    if len(pose_buf) == 0:
-        raise RuntimeError("No rigid body pose found on /rigid_bodies.")
+    if len(vicon_buf) == 0:
+        raise RuntimeError("No rigid body vicon data found on /rigid_bodies.")
 
-    df_w = pd.DataFrame(wheels_buf, columns=["t","w_lf","w_rf","w_lb","w_rb"]).sort_values("t").reset_index(drop=True)
-    df_p = pd.DataFrame(pose_buf, columns=["t","px","py","pz","qx","qy","qz","qw"]).sort_values("t").reset_index(drop=True)
+    df_w = pd.DataFrame(wheels_buf, columns=["t","w_lf","w_rf","w_lb","w_rb"]).sort_values("t").reset_index(drop=True) # data frame for the wheels
+    df_vicon = pd.DataFrame(vicon_buf, columns=["t","px","py","pz","qx","qy","qz","qw"]).sort_values("t").reset_index(drop=True) # data frame for the vicon data
 
     # Wheels -> body twist (Mecanum 45°)
     L = lx + ly
@@ -202,17 +202,17 @@ def extract(mcap_path: str, out_dir: str):
     df_w["vy_b_wheels"] = (r/4.0) * (-df_w["w_lf"] + df_w["w_rf"] + df_w["w_lb"] - df_w["w_rb"])
     df_w["omega_b_wheels"] = (r/(4.0*L)) * (-df_w["w_lf"] + df_w["w_rf"] - df_w["w_lb"] + df_w["w_rb"])
 
-    # Pose -> body twist
-    t = df_p["t"].to_numpy()
-    px = interp_nan(df_p["px"].to_numpy())
-    py = interp_nan(df_p["py"].to_numpy())
-    pz = interp_nan(df_p["pz"].to_numpy())
-    vx_w = np.gradient(px, t)
+    # Vicon -> body twist
+    t = df_vicon["t"].to_numpy()
+    px = interp_nan(df_vicon["px"].to_numpy())
+    py = interp_nan(df_vicon["py"].to_numpy())
+    pz = interp_nan(df_vicon["pz"].to_numpy())
+    vx_w = np.gradient(px, t)  # obtain world-frame velocity by differentiation
     vy_w = np.gradient(py, t)
     vz_w = np.gradient(pz, t)
 
-    qx = df_p["qx"].to_numpy(); qy = df_p["qy"].to_numpy()
-    qz = df_p["qz"].to_numpy(); qw = df_p["qw"].to_numpy()
+    qx = df_vicon["qx"].to_numpy(); qy = df_vicon["qy"].to_numpy()
+    qz = df_vicon["qz"].to_numpy(); qw = df_vicon["qw"].to_numpy()
     vbx = np.empty_like(vx_w); vby = np.empty_like(vy_w); vbz = np.empty_like(vz_w)
     yaw = np.empty_like(vx_w)
     for i in range(len(t)):
@@ -220,24 +220,24 @@ def extract(mcap_path: str, out_dir: str):
         R = quat_to_rotmat(*q); Rt = R.T
         vw = np.array([vx_w[i], vy_w[i], vz_w[i]])
         vb = Rt @ vw
-        vbx[i], vby[i], vbz[i] = vb
+        vbx[i], vby[i], vbz[i] = vb   # body-frame velocity (obtained from Vicon)
         yaw[i] = quat_to_yaw(*q)
     yaw_u = np.unwrap(yaw)
-    omega_b_pose = np.gradient(yaw_u, t)
+    omega_b_vicon = np.gradient(yaw_u, t)
 
-    df_pose_vel = pd.DataFrame({"t": df_p["t"], "vx_b_pose": vbx, "vy_b_pose": vby, "omega_b_pose": omega_b_pose})
+    df_vicon_vel = pd.DataFrame({"t": df_vicon["t"], "vx_b_vicon": vbx, "vy_b_vicon": vby, "omega_b_vicon": omega_b_vicon})  # body velocities from vicon
 
     # Align timelines
     df = pd.merge_asof(
         df_w[["t","vx_b_wheels","vy_b_wheels","omega_b_wheels"]].sort_values("t"),
-        df_pose_vel.sort_values("t"),
+        df_vicon_vel.sort_values("t"),
         on="t", direction="nearest"
     )
 
-    # --- Detect start/end using vx (prefer wheels; fallback to pose) ---
+    # --- Detect start/end using vx (prefer wheels; fallback to vicon) ---
     vx_ref = df["vx_b_wheels"].to_numpy()
     if np.isnan(vx_ref).all():
-        vx_ref = df["vx_b_pose"].to_numpy()
+        vx_ref = df["vx_b_vicon"].to_numpy()
     t_arr = df["t"].to_numpy()
     t_start, t_end = detect_motion_interval(t_arr, vx_ref, on_threshold=0.10, off_threshold=0.08)
 
@@ -246,7 +246,7 @@ def extract(mcap_path: str, out_dir: str):
     df.to_csv(out_csv, index=False)
 
     # --- Error analysis on v_x ---
-    df["err_vx"] = df["vx_b_wheels"] - df["vx_b_pose"]
+    df["err_vx"] = df["vx_b_wheels"] - df["vx_b_vicon"]
     if t_start is not None:
         if t_end is None:
             mask = (df["t"] >= t_start)
@@ -267,12 +267,12 @@ def extract(mcap_path: str, out_dir: str):
 
     # --- Plot difference with vertical lines ---
     plt.figure()
-    plt.plot(df["t"], df["err_vx"], label="vx_b_wheels - vx_b_pose")
+    plt.plot(df["t"], df["err_vx"], label="vx_b_wheels - vx_b_vicon")
     if t_start is not None:
-        plt.axvline(t_start, linestyle="--")
+        plt.axvline(t_start, linestyle="--", color="red", linewidth=2)
     if t_end is not None:
-        plt.axvline(t_end, linestyle="--")
-    plt.xlabel("time [s]"); plt.ylabel("velocity error [m/s]"); plt.title("v_x error (wheels - pose)")
+        plt.axvline(t_end, linestyle="--", color="red", linewidth=2)
+    plt.xlabel("time [s]"); plt.ylabel("velocity error [m/s]"); plt.title("v_x error (wheels - vicon)")
     plt.legend(); plt.tight_layout()
     plt.savefig(os.path.join(out_dir, "error_vx.png"), dpi=150); plt.close()
 
@@ -282,18 +282,18 @@ def extract(mcap_path: str, out_dir: str):
         plt.plot(df["t"], df[col_a], label=col_a)
         plt.plot(df["t"], df[col_b], label=col_b)
         if t_start is not None:
-            plt.axvline(t_start, linestyle="--")
+            plt.axvline(t_start, linestyle="--", color="red", linewidth=2)
         if t_end is not None:
-            plt.axvline(t_end, linestyle="--")
+            plt.axvline(t_end, linestyle="--", color="red", linewidth=2)
         plt.xlabel("time [s]"); plt.ylabel(ylabel); plt.title(title); plt.legend(); plt.tight_layout()
         plt.savefig(out_png, dpi=150); plt.close()
 
-    plot_compare_with_lines("vx_b_wheels", "vx_b_pose", "v_x (body) [m/s]",
-                            "Body v_x: wheels vs pose", os.path.join(out_dir, "compare_vx_body.png"))
-    plot_compare_with_lines("vy_b_wheels", "vy_b_pose", "v_y (body) [m/s]",
-                            "Body v_y: wheels vs pose", os.path.join(out_dir, "compare_vy_body.png"))
-    plot_compare_with_lines("omega_b_wheels", "omega_b_pose", "omega_z (body) [rad/s]",
-                            "Body omega_z: wheels vs pose", os.path.join(out_dir, "compare_omega_body.png"))
+    plot_compare_with_lines("vx_b_wheels", "vx_b_vicon", "v_x (body) [m/s]",
+                            "Body v_x: wheels vs vicon", os.path.join(out_dir, "compare_vx_body.png"))
+    plot_compare_with_lines("vy_b_wheels", "vy_b_vicon", "v_y (body) [m/s]",
+                            "Body v_y: wheels vs vicon", os.path.join(out_dir, "compare_vy_body.png"))
+    plot_compare_with_lines("omega_b_wheels", "omega_b_vicon", "omega_z (body) [rad/s]",
+                            "Body omega_z: wheels vs vicon", os.path.join(out_dir, "compare_omega_body.png"))
 
     print("Done.")
     print(f"Saved data: {out_csv}")
