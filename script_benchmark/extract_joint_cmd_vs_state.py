@@ -66,6 +66,45 @@ def to_float_list(seq) -> Optional[List[float]]:
 def safe_name(label: str) -> str:
     return label.replace("/", "_").replace("[", "_").replace("]", "")
 
+def detect_motion_interval(t: np.ndarray, series: np.ndarray,
+                           on_threshold: float = 0.10,
+                           baseline: Optional[float] = None,
+                           baseline_samples: int = 5) -> Tuple[Optional[float], Optional[float]]:
+    """
+    Detect start/end of motion comparing deviations from a resting baseline.
+
+    - `baseline`: if provided, used as resting value; otherwise computed as the
+      median of the first `baseline_samples` entries of `series` (or first entry
+      if fewer samples are available).
+    - `on_threshold`: threshold for |series - baseline| to consider motion.
+
+    Returns (t_start, t_end) in seconds (same units as `t`). If not found,
+    returns (None, None).
+    """
+    if len(t) == 0 or len(series) == 0:
+        return (None, None)
+
+    # compute baseline from first samples if not provided
+    if baseline is None:
+        n = min(max(1, baseline_samples), len(series))
+        try:
+            baseline = float(np.nanmedian(series[:n]))
+        except Exception:
+            baseline = float(series[0])
+
+    # detect where the series deviates from baseline by more than threshold
+    mask_on = np.abs(series - baseline) > on_threshold
+    if not mask_on.any():
+        return (None, None)
+
+    start_idx = int(np.argmax(mask_on))
+    end_indices = np.where(mask_on)[0]
+    end_idx = int(end_indices[-1]) if len(end_indices) > 0 else None
+
+    t_start = float(t[start_idx])
+    t_end = float(t[end_idx]) if end_idx is not None else None
+    return (t_start, t_end)
+
 def save_series(out_dir: str, label: str, t: List[float], v: List[float], ylabel="value"):
     ensure_dir(out_dir)
     fname = safe_name(label)
@@ -234,16 +273,77 @@ def extract(mcap_path: str, out_dir: str):
                 save_series(out_st, label, t_st_cur, v_st_cur, ylabel="current [A]")
 
     # -------- comparison plots: position command vs position state ----------
-    # Use index correspondence (0↔0, 1↔1, ...), and print a small warning if names differ.
-    for i in range(n):
-        name_cmd = cmd_names_sample[i] if (cmd_names_sample and i < n_cmd) else f"idx{i}"
-        name_st  = st_names_sample[i]  if (st_names_sample  and i < n_st)  else f"idx{i}"
-        if cmd_names_sample and st_names_sample and i < n_cmd and i < n_st and (name_cmd != name_st):
-            print(f"[WARN] Name mismatch at index {i}: command='{name_cmd}' vs state='{name_st}'. Using index pairing.")
-
+    # Match by joint NAME (not index) to handle different orderings
+    
+    # Build name-to-index mappings
+    cmd_name_to_idx = {}
+    if cmd_names_sample:
+        for idx, name in enumerate(cmd_names_sample):
+            cmd_name_to_idx[name] = idx
+    
+    st_name_to_idx = {}
+    if st_names_sample:
+        for idx, name in enumerate(st_names_sample):
+            st_name_to_idx[name] = idx
+    
+    # Find common joint names
+    cmd_names_set = set(cmd_name_to_idx.keys())
+    st_names_set = set(st_name_to_idx.keys())
+    common_names = sorted(cmd_names_set & st_names_set)
+    
+    # If no common names, fall back to index-based pairing
+    if not common_names:
+        print("[INFO] No common joint names found between command and state. Using index-based pairing.")
+        common_names = [f"idx{i}" for i in range(n)]
+        use_index_pairing = True
+    else:
+        use_index_pairing = False
+        print(f"[INFO] Found {len(common_names)} common joints: {common_names}")
+    
+    # --- Compute a single global motion interval for this file (per iteration) ---
+    t_start_global: Optional[float] = None
+    t_end_global: Optional[float] = None
+    if st_time and st_vel_samples:
+        # Build a reference scalar velocity series by averaging absolute joint velocities
+        try:
+            t_st = np.array(st_time)
+            vel_ref = np.array([np.nan if (not arr) else np.nanmean(np.abs(arr)) for arr in st_vel_samples], dtype=float)
+            # drop nan pairs
+            valid = ~np.isnan(vel_ref)
+            if valid.any():
+                t_st_valid = t_st[valid]
+                vel_ref_valid = vel_ref[valid]
+                # baseline as median of first few samples
+                baseline_n = min(5, len(vel_ref_valid))
+                baseline_val = float(np.nanmedian(vel_ref_valid[:baseline_n]))
+                t_start_global, t_end_global = detect_motion_interval(t_st_valid, vel_ref_valid,
+                                                                     on_threshold=0.10,
+                                                                     baseline=baseline_val,
+                                                                     baseline_samples=baseline_n)
+                print(f"[INFO] Global motion interval: t_start={t_start_global}, t_end={t_end_global}")
+        except Exception:
+            t_start_global, t_end_global = (None, None)
+    
+    # Plot comparison for each joint
+    joint_errors = []  # lista di (joint_name, mae_pos, t_start, t_end)
+    
+    for joint_name in common_names:
+        if use_index_pairing:
+            # Fallback: use index
+            i = int(joint_name.replace("idx", ""))
+            idx_cmd = i if i < n_cmd else None
+            idx_st = i if i < n_st else None
+        else:
+            # Use name-based matching
+            idx_cmd = cmd_name_to_idx.get(joint_name)
+            idx_st = st_name_to_idx.get(joint_name)
+        
+        if idx_cmd is None or idx_st is None:
+            continue
+        
         # fetch position series
-        t_cmd_pos, v_cmd_pos = index_series(cmd_time, cmd_pos_samples, i)
-        t_st_pos,  v_st_pos  = index_series(st_time,  st_pos_samples,  i)
+        t_cmd_pos, v_cmd_pos = index_series(cmd_time, cmd_pos_samples, idx_cmd)
+        t_st_pos,  v_st_pos  = index_series(st_time,  st_pos_samples,  idx_st)
 
         if not t_cmd_pos or not t_st_pos:
             # not enough data to compare
@@ -254,14 +354,81 @@ def extract(mcap_path: str, out_dir: str):
         df_st  = pd.DataFrame({"t": t_st_pos,  "pos_st":  v_st_pos}).sort_values("t")
         df = pd.merge_asof(df_cmd, df_st, on="t", direction="nearest")
 
+        # Decide whether to compare position or velocity (wheels are velocity-controlled)
+        is_wheel = ("WHEEL" in joint_name.upper())
+
+        if is_wheel:
+            # compare velocities
+            t_cmd_v, v_cmd_v = index_series(cmd_time, cmd_vel_samples, idx_cmd)
+            t_st_v,  v_st_v  = index_series(st_time,  st_vel_samples,  idx_st)
+            if not t_cmd_v or not t_st_v:
+                # fallback to position if velocities missing
+                compare_type = "position"
+            else:
+                compare_type = "velocity"
+        else:
+            compare_type = "position"
+
+        if compare_type == "position":
+            df_cmd = pd.DataFrame({"t": t_cmd_pos, "val_cmd": v_cmd_pos}).sort_values("t")
+            df_st  = pd.DataFrame({"t": t_st_pos,  "val_st":  v_st_pos}).sort_values("t")
+        else:
+            df_cmd = pd.DataFrame({"t": t_cmd_v, "val_cmd": v_cmd_v}).sort_values("t")
+            df_st  = pd.DataFrame({"t": t_st_v,  "val_st":  v_st_v}).sort_values("t")
+
+        df = pd.merge_asof(df_cmd, df_st, on="t", direction="nearest")
+        df["err"] = df["val_cmd"] - df["val_st"]
+
+        # Use the global motion interval if available; otherwise fallback to per-joint detection
+        if t_start_global is not None and t_end_global is not None:
+            t_start = t_start_global
+            t_end = t_end_global
+        else:
+            # fallback: detect per-joint using velocity derived from state values
+            t_arr = df["t"].to_numpy()
+            try:
+                vel_st = np.gradient(df["val_st"].to_numpy(), t_arr)
+                t_start, t_end = detect_motion_interval(t_arr, vel_st, on_threshold=0.10)
+            except Exception:
+                t_start, t_end = (None, None)
+
+        # Calcola MAE durante il movimento
+        if t_start is not None and t_end is not None:
+            mask = (df["t"] >= t_start) & (df["t"] <= t_end)
+            mae = float(np.nanmean(np.abs(df.loc[mask, "err"])))
+        else:
+            mae = float(np.nanmean(np.abs(df["err"])))
+
+        joint_errors.append((joint_name, mae, t_start, t_end, compare_type))
+        print(f"  {joint_name}: MAE = {mae:.6f} ({compare_type})")
+
+        # Save timeseries of error for later aggregation
+        timeseries_dir = os.path.join(out_dir, "compare_timeseries")
+        ensure_dir(timeseries_dir)
+        ts_csv = os.path.join(timeseries_dir, f"err_{safe_name(joint_name)}.csv")
+        pd.DataFrame({"t": df["t"], "err": df["err"]}).to_csv(ts_csv, index=False)
+
+        # Plot command vs state
         plt.figure()
-        plt.plot(df["t"], df["pos_cmd"], label=f"command ({name_cmd})")
-        plt.plot(df["t"], df["pos_st"],  label=f"state   ({name_st})")
-        plt.xlabel("time [s]"); plt.ylabel("position [rad]")
-        plt.title(f"Position: command vs state – index {i} ({name_cmd})")
+        plt.plot(df["t"], df["val_cmd"], label=f"command ({joint_name})")
+        plt.plot(df["t"], df["val_st"],  label=f"state   ({joint_name})")
+        if t_start is not None and t_end is not None:
+            plt.axvline(t_start, linestyle="--", color="red", linewidth=2, alpha=0.5)
+            plt.axvline(t_end, linestyle="--", color="red", linewidth=2, alpha=0.5)
+        plt.xlabel("time [s]")
+        plt.ylabel("velocity [rad/s]" if compare_type=="velocity" else "position [rad]")
+        ctrl_label = 'Velocity control' if compare_type == 'velocity' else 'Position control'
+        plt.title(f"{ctrl_label}: command vs state - {joint_name}")
         plt.legend(); plt.tight_layout()
-        plt.savefig(os.path.join(out_cmp, f"compare_position_idx{i}_{safe_name(name_cmd)}.png"), dpi=150)
+        plt.savefig(os.path.join(out_cmp, f"compare_{compare_type}_{safe_name(joint_name)}.png"), dpi=150)
         plt.close()
+    
+    # Salva errori joint in CSV
+    if joint_errors:
+        df_errors = pd.DataFrame(joint_errors, columns=["joint_name", "mae_pos", "t_start", "t_end", "compare_type"])
+        errors_csv = os.path.join(out_dir, "joint_error_summary.csv")
+        df_errors.to_csv(errors_csv, index=False)
+        print(f"\nJoint errors saved in: {errors_csv}")
 
     print(f"Done.\n- Saved per-index series in:\n  {out_cmd}\n  {out_st}\n- Comparison plots in:\n  {out_cmp}")
 

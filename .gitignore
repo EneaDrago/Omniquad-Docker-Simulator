@@ -4,3 +4,4 @@
 core
 core.*
 /rosbag*
+/script_benchmark/output
