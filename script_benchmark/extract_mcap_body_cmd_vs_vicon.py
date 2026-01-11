@@ -296,6 +296,72 @@ def extract(mcap_path: str, out_dir: str):
     plot_compare_with_lines("omega_b_cmd", "omega_b_vicon", "omega_z (body) [rad/s]",
                             "Body omega_z: cmd vs vicon", os.path.join(out_dir, "compare_omega_body.png"))
 
+    # --- 3D trajectory with orientation frames ---
+    try:
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        fig = plt.figure(figsize=(12, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Plot trajectory
+        px_traj = df_vicon["px"].to_numpy()
+        py_traj = df_vicon["py"].to_numpy()
+        pz_traj = df_vicon["pz"].to_numpy()
+        
+        ax.plot(px_traj, py_traj, pz_traj, 'b-', linewidth=2, label='Trajectory')
+        ax.scatter(px_traj[0], py_traj[0], pz_traj[0], c='green', s=100, marker='o', label='Start')
+        ax.scatter(px_traj[-1], py_traj[-1], pz_traj[-1], c='red', s=100, marker='s', label='End')
+        
+        # Add orientation frames at regular intervals
+        n_frames = min(10, len(df_vicon))  # Show up to 10 frames
+        indices = np.linspace(0, len(df_vicon)-1, n_frames, dtype=int)
+        frame_length = 0.015  # Length of axis arrows (reduced)
+        
+        for idx in indices:
+            px, py, pz = px_traj[idx], py_traj[idx], pz_traj[idx]
+            qx_i = df_vicon.iloc[idx]["qx"]
+            qy_i = df_vicon.iloc[idx]["qy"]
+            qz_i = df_vicon.iloc[idx]["qz"]
+            qw_i = df_vicon.iloc[idx]["qw"]
+            
+            # Normalize quaternion
+            q = normalize_quaternion(qx_i, qy_i, qz_i, qw_i)
+            R = quat_to_rotmat(*q)
+            
+            # Get rotated axis directions (x=red, y=green, z=blue)
+            x_axis = R[:, 0] * frame_length
+            y_axis = R[:, 1] * frame_length
+            z_axis = R[:, 2] * frame_length
+            
+            # Draw axes as arrows
+            ax.quiver(px, py, pz, x_axis[0], x_axis[1], x_axis[2], color='r', arrow_length_ratio=0.3, linewidth=1.5)
+            ax.quiver(px, py, pz, y_axis[0], y_axis[1], y_axis[2], color='g', arrow_length_ratio=0.3, linewidth=1.5)
+            ax.quiver(px, py, pz, z_axis[0], z_axis[1], z_axis[2], color='b', arrow_length_ratio=0.3, linewidth=1.5)
+        
+        ax.set_xlabel('X [m]')
+        ax.set_ylabel('Y [m]')
+        ax.set_zlabel('Z [m]')
+        ax.set_title('3D Trajectory with Orientation Frames')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        
+        # Set equal aspect ratio
+        max_range = np.array([px_traj.max()-px_traj.min(), py_traj.max()-py_traj.min(), pz_traj.max()-pz_traj.min()]).max() / 2.0
+        mid_x = (px_traj.max()+px_traj.min()) * 0.5
+        mid_y = (py_traj.max()+py_traj.min()) * 0.5
+        mid_z = (pz_traj.max()+pz_traj.min()) * 0.5
+        ax.set_xlim(mid_x - max_range, mid_x + max_range)
+        ax.set_ylim(mid_y - max_range, mid_y + max_range)
+        ax.set_zlim(mid_z - max_range, mid_z + max_range)
+        
+        plt.tight_layout()
+        png_path = os.path.join(out_dir, "trajectory_3d.png")
+        plt.savefig(png_path, dpi=150)
+        plt.close()
+        print(f"Saved 3D trajectory: {png_path}")
+    except Exception as e:
+        print(f"Warning: Could not create 3D trajectory plot: {e}")
+
     print("Done.")
     print(f"Saved data: {out_csv}")
     print(f"Saved error summary: {err_csv}")
