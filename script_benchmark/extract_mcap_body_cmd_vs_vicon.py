@@ -167,9 +167,9 @@ def extract(mcap_path: str, out_dir: str):
                     vel = getattr(cmd, "velocity", None)
                     if vel is not None and len(vel) > max(idx_lf, idx_rf, idx_lb, idx_rb):
                         w_lf = float(vel[idx_lf])
-                        w_rf = float(vel[idx_rf])  # your sign convention
+                        w_rf = -float(vel[idx_rf])  # your sign convention
                         w_lb = float(vel[idx_lb])
-                        w_rb = float(vel[idx_rb])  # your sign convention
+                        w_rb = -float(vel[idx_rb])  # your sign convention
                         cmd_buf.append((t, w_lf, w_rf, w_lb, w_rb))
                 except Exception:
                     pass
@@ -198,8 +198,8 @@ def extract(mcap_path: str, out_dir: str):
 
     # Command (wheels) -> body twist (Mecanum 45°)
     L = lx + ly
-    df_cmd["vx_b_cmd"] = (r/4.0) * (df_cmd["w_lf"] + df_cmd["w_rf"] + df_cmd["w_lb"] + df_cmd["w_rb"])
-    df_cmd["vy_b_cmd"] = (r/4.0) * (-df_cmd["w_lf"] + df_cmd["w_rf"] + df_cmd["w_lb"] - df_cmd["w_rb"])
+    df_cmd["vx_b_cmd"] = -(r/4.0) * (-df_cmd["w_lf"] + df_cmd["w_rf"] + df_cmd["w_lb"] - df_cmd["w_rb"])
+    df_cmd["vy_b_cmd"] = (r/4.0) * (df_cmd["w_lf"] + df_cmd["w_rf"] + df_cmd["w_lb"] + df_cmd["w_rb"])
     df_cmd["omega_b_cmd"] = (r/(4.0*L)) * (-df_cmd["w_lf"] + df_cmd["w_rf"] - df_cmd["w_lb"] + df_cmd["w_rb"])
 
     # Vicon -> body twist
